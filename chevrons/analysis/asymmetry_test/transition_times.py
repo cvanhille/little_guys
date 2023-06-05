@@ -85,9 +85,15 @@ for i, file in enumerate(tqdm(files)):
         tchevs = frms[shape == 0]
         tclose = frms[np.mean(dists,1) < 1.02]
         tvals = np.intersect1d(tchevs,tclose)
-        time = np.min(tvals)
+        if len(tvals) == 0:
+            time = np.nan
+        else:
+            time = np.min(tvals)
     else:
         time = np.min(frms[shape == 0])
+
+    if np.isnan(time):
+        continue
 
     seeds.append(seed)
     times.append(time)
