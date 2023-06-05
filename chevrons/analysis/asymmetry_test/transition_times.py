@@ -3,6 +3,7 @@ import pandas as pd
 from ovito.io import *
 import sys
 import glob
+from tqdm.auto import tqdm
 
 def angles(pos,typ,dtyp):
     v1 = pos[typ == 3+dtyp][0] - pos[typ == 4+dtyp][0]
@@ -62,7 +63,7 @@ if not (ck == 'y' or ck == 'yes' or ck == 'Y'):
 
 seeds = []
 times = []
-for path in paths:
+for i, path in enumerate(tqdm(paths)):
     seed = int(path.split('/sd')[1])
     p = import_file('%s/output.xyz'%(path))
     frms, tips, bacs = ats(p,dtyp)
