@@ -45,7 +45,7 @@ if len(sys.argv) < 3:
     exit()
 
 gpath = sys.argv[1]
-key = int(sys.argv[2])
+key = sys.argv[2]
 
 if key == 'LB' or key == 'L' or key == 'left':
     dtyp = 0
