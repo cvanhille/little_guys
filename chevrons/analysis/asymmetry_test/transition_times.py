@@ -53,9 +53,10 @@ if key == 'LB' or key == 'L' or key == 'left':
 elif key == 'RB' or key == 'R' or key == 'right':
     dtyp = 6
 
-paths = glob.glob('%s/sd*'%(gpath))
+files = glob.glob('%s/sd*/output.xyz'%(gpath))
 print()
-ck = input("%d paths to analyse! Continue? [y/n] "%(len(paths)))
+ck = input("%d simulations to analyse! Continue? [y/n] "%(len(files)))
+print()
 if not (ck == 'y' or ck == 'yes' or ck == 'Y'):
     print("Ok! Aborting...")
     print()
@@ -63,9 +64,9 @@ if not (ck == 'y' or ck == 'yes' or ck == 'Y'):
 
 seeds = []
 times = []
-for i, path in enumerate(tqdm(paths)):
-    seed = int(path.split('/sd')[1])
-    p = import_file('%s/output.xyz'%(path))
+for i, file in enumerate(tqdm(files)):
+    seed = int(file.split('/output.xyz').split('/sd')[1])
+    p = import_file(file)
     frms, tips, bacs = ats(p,dtyp)
     shape = np.abs(bacs-120)/60
     shape[shape > 0.8] = 1.0
