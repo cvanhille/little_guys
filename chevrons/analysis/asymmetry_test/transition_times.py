@@ -26,27 +26,34 @@ def ats(p,dtyp):
     tips = []
     bacs = []
     frms = []
+    dists = []
     for fr in range(p.source.num_frames+1):
         d = p.compute(fr)
         pos = np.array(d.particles['Position'])[:,:2]
         typ = np.array(d.particles['Particle Type'])
         atip, abac = angles(pos,typ,dtyp)
+        d1 = np.linalg.norm(pos[typ == 1][0] - pos[typ == 10][0])
+        d2 = np.linalg.norm(pos[typ == 2][0] - pos[typ == 9][0])
+        d3 = np.linalg.norm(pos[typ == 6][0] - pos[typ == 11][0])
+        dists.append([d1,d2,d3])
         tips.append(atip)
         bacs.append(abac)
         frms.append(fr)
     frms = np.array(frms)
     tips = np.array(tips)
     bacs = np.array(bacs)
-    return frms, tips, bacs
+    dists = np.array(dists)
+    return frms, tips, bacs, dists
 
 if len(sys.argv) < 3:
     print()
-    print("Error! Wrong number of arguments. Please provide: 1) general path to sample 2) key for type of binding (LB/RB)")
+    print("Error! Wrong number of arguments. Please provide: 1) general path to sample 2) key for type of binding (LB/RB) 3) binding mde (dist/nodist)")
     print()
     exit()
 
 gpath = sys.argv[1]
 key = sys.argv[2]
+mode = sys.argv[3]
 
 if key == 'LB' or key == 'L' or key == 'left':
     dtyp = 0
@@ -67,13 +74,20 @@ times = []
 for i, file in enumerate(tqdm(files)):
     seed = int(file.split('/output.xyz')[0].split('/sd')[1])
     p = import_file(file)
-    frms, tips, bacs = ats(p,dtyp)
+    frms, tips, bacs, dists = ats(p,dtyp)
     shape = np.abs(bacs-120)/60
     shape[shape > 0.8] = 1.0
     shape[shape < 0.2] = 0.0
     shape[shape%1.0 > 0] = np.nan
     sw = 120+shape*60
-    time = np.min(frms[shape == 0])
+
+    if mode == 'dist':
+        tchevs = frms[shape == 0]
+        tclose = frms[np.mean(dists,1) < 1.02]
+        tvals = np.intersect1d(tchevs,tclose)
+        time = np.min(tvals)
+    else:
+        time = np.min(frms[shape == 0])
 
     seeds.append(seed)
     times.append(time)
