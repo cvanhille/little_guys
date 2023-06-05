@@ -65,7 +65,7 @@ if not (ck == 'y' or ck == 'yes' or ck == 'Y'):
 seeds = []
 times = []
 for i, file in enumerate(tqdm(files)):
-    seed = int(file.split('/output.xyz').split('/sd')[1])
+    seed = int(file.split('/output.xyz')[0].split('/sd')[1])
     p = import_file(file)
     frms, tips, bacs = ats(p,dtyp)
     shape = np.abs(bacs-120)/60
