@@ -78,7 +78,7 @@ for i, file in enumerate(tqdm(files)):
     seeds.append(seed)
     times.append(time)
 
-data = pd.DataFrame(index_col = np.arange(len(seeds)), columns = ['seed', 'time'])
+data = pd.DataFrame(index = np.arange(len(seeds)), columns = ['seed', 'time'])
 data['seed'] = seeds
 data['time'] = times
 data.to_csv('%s/binding_times.txt'%(gpath))
