@@ -54,7 +54,7 @@ elif key == 'RB' or key == 'R' or key == 'right':
 
 paths = glob.glob('%s/sd*'%(gpath))
 print()
-ck = input("%d paths to analyse! Continue? [y/n] ")
+ck = input("%d paths to analyse! Continue? [y/n] "%(len(paths)))
 if not (ck == 'y' or ck == 'yes' or ck == 'Y'):
     print("Ok! Aborting...")
     print()
@@ -71,7 +71,7 @@ for path in paths:
     shape[shape < 0.2] = 0.0
     shape[shape%1.0 > 0] = np.nan
     sw = 120+shape*60
-    tbind = np.min(frms[shape == 0])
+    time = np.min(frms[shape == 0])
 
     seeds.append(seed)
     times.append(time)
