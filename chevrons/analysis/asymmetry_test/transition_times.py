@@ -71,6 +71,7 @@ if not (ck == 'y' or ck == 'yes' or ck == 'Y'):
 
 seeds = []
 times = []
+tcons = []
 for i, file in enumerate(tqdm(files)):
     seed = int(file.split('/output.xyz')[0].split('/sd')[1])
     p = import_file(file)
@@ -80,6 +81,13 @@ for i, file in enumerate(tqdm(files)):
     shape[shape < 0.2] = 0.0
     shape[shape%1.0 > 0] = np.nan
     sw = 120+shape*60
+
+    if len(frms[np.mean(dists,1) < 1.2]) > 0:
+        tconn = np.min(frms[np.mean(dists,1) < 1.2])
+        tconn1 = np.min(frms[dists[:,0] < 1.2])
+        tconn2 = np.min(frms[dists[:,1] < 1.2])
+        tconn3 = np.min(frms[dists[:,2] < 1.2])
+        tcons.append([tconn1, tconn2, tconn3, tconn])
 
     if mode == 'dist':
         tchevs = frms[shape == 0]
@@ -98,7 +106,13 @@ for i, file in enumerate(tqdm(files)):
     seeds.append(seed)
     times.append(time)
 
-data = pd.DataFrame(index = np.arange(len(seeds)), columns = ['seed', 'time'])
+tcons = np.array(tcons)
+
+data = pd.DataFrame(index = np.arange(len(seeds)), columns = ['seed', 'time', 'tc1', 'tc2', 'tc3', 'tcm'])
 data['seed'] = seeds
 data['time'] = times
+data['tc1'] = tcons[:,0]
+data['tc2'] = tcons[:,1]
+data['tc3'] = tcons[:,2]
+data['tcm'] = tcons[:,3]
 data.to_csv('%s/binding_times.txt'%(gpath))
