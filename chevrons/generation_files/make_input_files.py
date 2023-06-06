@@ -8,6 +8,8 @@ parser = argparse.ArgumentParser(description='')
 parser.add_argument('-p', '--path', help='path to simulation folder - REQUIRED', required=True, type=str)
 parser.add_argument('-Kbond', '--Kbond', help='bond constant [kT/sigma2]', required=False, type=float, default=500.0)
 parser.add_argument('-eps', '--eps', help='binding constant [kT]', required=False, type=float, default=8.0)
+parser.add_argument('-epsA', '--epsA', help='binding constant for intra line pair [kT]', required=False, type=float, default=0.0)
+parser.add_argument('-epsB', '--epsB', help='binding constant for intra perp pair [kT]', required=False, type=float, default=0.0)
 parser.add_argument('-coff', '--coff', help='cutoff distance [sigma]', required=False, type=float, default=1.2)
 parser.add_argument('-tstep', '--tstep', help='simulation timestep [simulation time units]', required=False, type=float, default=0.01)
 parser.add_argument('-runtime', '--runtime', help='simulation run time [simulation time units]', required=False, type=float, default=100.0)
@@ -19,6 +21,8 @@ args = parser.parse_args()
 gpath = args.path
 Kbond = float(args.Kbond)
 eps = float(args.eps)
+epsA = float(args.epsA)
+epsB = float(args.epsB)
 coff = float(args.coff)
 tstep = float(args.tstep)
 runtime = float(args.runtime)
@@ -227,12 +231,14 @@ read_data           configuration.dat
 
 variable            Kbond equal %.1f                           	# bond constant [kT/sigma2]
 variable            eps equal %.1f                           	# binding constant [kT]
+variable            epsA equal %.1f                           	# binding constant A pair [kT]
+variable            epsB equal %.1f                           	# binding constant B pair [kT]
 variable            coff equal %f                           	# cutoff distance [sigma]
 variable            tstep equal %f                             	# simulation timestep size [seconds]
 variable            seed equal %d                               	# random number generator seed
 variable            run_steps equal %d          					# simulation run time [simulation steps]
 variable            dump_time equal %d        						# dumping interval [simulation steps]
-'''%(Kbond,eps,coff,tstep,seed,runsteps,dump))
+'''%(Kbond,eps,epsA,epsB,coff,tstep,seed,runsteps,dump))
 f.write('''
 special_bonds       lj 1.0 1.0 1.0
 bond_style          harmonic
@@ -248,6 +254,16 @@ if eps > 0:
 	f.write("pair_coeff          6 11 cosine/squared ${eps} 1.00 ${coff} wca 			# bottom interaction 6-5\n")
 	if config.split('_')[-1] == 'FR' or config.split('_')[0] == 'FAR':
 		f.write("pair_coeff          1 10 cosine/squared ${eps} 1.00 ${coff} wca 			# middle interaction 1-4\n")
+	if epsA > 0:
+		if config.split('_')[1] == 'LB':
+			f.write("pair_coeff          1 4 cosine/squared ${epsA} 1.00 ${coff} wca 			# A pair intra 1-4\n")
+		elif config.split('_')[1] == 'RB':
+			f.write("pair_coeff          7 10 cosine/squared ${epsA} 1.00 ${coff} wca 			# A pair intra 1-4\n")
+	if epsB > 0:
+		if config.split('_')[1] == 'LB':
+			f.write("pair_coeff          3 5 cosine/squared ${epsB} 1.00 ${coff} wca 			# B pair intra 3-5\n")
+		elif config.split('_')[1] == 'RB':
+			f.write("pair_coeff          9 11 cosine/squared ${epsB} 1.00 ${coff} wca 			# B pair intra 3-5\n")
 f.write('''
 fix                 fLang all langevin 1.0 1.0 1.0 ${seed}
 fix                 fNVE all nve
