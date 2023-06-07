@@ -23,8 +23,9 @@ print("OK! Will sample %s"%(paths_seed))
 paths = glob.glob(paths_seed)
 check = input("%d simulations to run here... Are you sure? [y/n] "%(len(paths)))
 
-wall_time = int(input("What wall time would you like? (in hours please, only integer numbers) "))
-print("OK! Will set a wall time of %d hours!"%(wall_time))
+wall_hours = int(input("What wall time hours would you like? (in hours please, only integer numbers) "))
+wall_mins = int(input("What wall time minutes would you like? (in minutes please, only integer numbers) "))
+print("OK! Will set a wall time of %d hours and %d minutes!"%(wall_hours, wall_mins))
 
 memory = int(input("How much memory would you like? (in GB please, only integer numbers) "))
 print("OK! Will request %d GB!"%(memory))
@@ -69,7 +70,7 @@ f.write("#SBATCH --array=1-%d:1\n"%(len(paths)))
 f.write('''#
 #Maximum runtime is limited to 10 days, ie. 240 hours
 ''')
-f.write("#SBATCH --time=%d:00:00\n#\n#SBATCH --mem=%dG\n"%(wall_time,memory))
+f.write("#SBATCH --time=%d:%d:00\n#\n#SBATCH --mem=%dG\n"%(wall_hours,wall_mins,memory))
 f.write('''#
 #Do not requeue the job in the case it fails.
 #SBATCH --no-requeue

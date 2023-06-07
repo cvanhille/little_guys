@@ -16,6 +16,7 @@ parser.add_argument('-runtime', '--runtime', help='simulation run time [simulati
 parser.add_argument('-frate', '--frate', help='frame rate [simulation time units]', required=False, type=float, default=0.1)
 parser.add_argument('-sd','--seed', help='random number generator seed', required=False, type=int, default=1234)
 parser.add_argument('-config','--config', help='configuration to simulate - REQUIRED', required=True, type=str)
+parser.add_argument('-bonding','--bonding', help='bonding mode', required=False, action = 'store_true')
 
 args = parser.parse_args()
 gpath = args.path
@@ -31,6 +32,7 @@ seed = int(args.seed)
 runsteps = int(runtime/tstep)
 dump = int(frate/tstep)
 config = args.config
+bonding = args.bonding
 
 np.random.seed(seed)
 
@@ -198,9 +200,10 @@ atom_style          molecular
 dimension           2 
 boundary            p p p
 log                 log.txt
-read_data           configuration.dat
-
-variable            Kbond equal %.1f                           	# bond constant [kT/sigma2]
+read_data           configuration.dat''')
+if bonding:
+	f.write("  extra/bond/per/atom 5  extra/special/per/atom 20  extra/angle/per/atom 3\n\n")
+f.write('''variable            Kbond equal %.1f                           	# bond constant [kT/sigma2]
 variable            eps equal %.1f                           	# binding constant [kT]
 variable            epsA equal %.1f                           	# binding constant A pair [kT]
 variable            epsB equal %.1f                           	# binding constant B pair [kT]
@@ -235,6 +238,11 @@ if epsB > 0:
 		f.write("pair_coeff          3 5 cosine/squared ${epsB} 1.00 ${coff} wca 			# B pair intra 3-5\n")
 	elif (len(config.split('_')) > 1 and config.split('_')[1] == 'RB'):
 		f.write("pair_coeff          9 11 cosine/squared ${epsB} 1.00 ${coff} wca 			# B pair intra 3-5\n")
+if bonding:
+	f.write("\n")
+	f.write("fix					fBindC all bond/create 1 1 10 1.05 1\n")
+	f.write("fix					fBindT all bond/create 1 2 9 1.05 1\n")
+	f.write("fix					fBindB all bond/create 1 6 11 1.05 1\n")
 f.write('''
 fix                 fLang all langevin 1.0 1.0 1.0 ${seed}
 fix                 fNVE all nve
