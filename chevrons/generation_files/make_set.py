@@ -15,6 +15,7 @@ parser.add_argument('-runtime', '--runtime', help='simulation run time [simulati
 parser.add_argument('-frate', '--frate', help='frame rate [simulation time units]', required=False, type=float, default=1.0)
 parser.add_argument('-N','--N', help='number of repetitions', required=False, type=int, default=1000)
 parser.add_argument('-config','--config', help='configuration to simulate - REQUIRED', required=True, type=str)
+parser.add_argument('-bonding','--bonding', help='bonding mode', required=False, action = 'store_true')
 
 args = parser.parse_args()
 gpath = args.path
@@ -26,6 +27,7 @@ runtime = float(args.runtime)
 frate = float(args.frate)
 N = int(args.N)
 config = args.config
+bonding = args.bonding
 
 seeds = np.random.randint(0,9000, size = N) + 1000
 
@@ -45,6 +47,8 @@ r = os.system('mkdir %s'%(gpath))
 
 for i, seed in enumerate(tqdm(seeds)):
 	command = 'python3 make_input_files.py -p %s/sd%d -config %s -runtime %f -frate %f -Kbond %f -eps %f -epsA %f -epsB %f -sd %d'%(gpath,seed,config,runtime,frate,Kbond,eps,epsA,epsB,seed)
+	if bonding:
+		command = '%s -bonding'%(command)
 	r = os.system(command)
 
 print("Done!")
