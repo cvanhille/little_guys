@@ -44,10 +44,7 @@ else:
 	exit()
 
 if config.split('_')[0] == 'FAR':
-	print()
-	print("Generating new config file for FAR setup of binding interactions...")
 	if config.split('_')[1] == 'LB':
-		# print("Left-binding setup")
 		f = open('%s/configuration.dat'%(gpath), 'w')
 		f.write("# Configuration file for the initial conditions of the chevron-like molecules simulations\n\n")
 		f.write("12 atoms\n")
@@ -75,18 +72,6 @@ if config.split('_')[0] == 'FAR':
 		pos0y = 20*(0.5-np.random.random())
 		pos1x = 10*np.random.random()
 		pos1y = 20*(0.5-np.random.random())
-		# f.write("1 1 1 %f %f 0.0000000\n"%(pos0x,pos0y))
-		# f.write("2 1 2 %f %f 0.0000000\n"%(pos0x+0.5,pos0y+0.8660254))
-		# f.write("3 1 3 %f %f 0.0000000\n"%(pos0x-0.5,pos0y+0.8660254))
-		# f.write("4 1 4 %f %f 0.0000000\n"%(pos0x-1.0,pos0y))
-		# f.write("5 1 5 %f %f 0.0000000\n"%(pos0x-0.5,pos0y-0.8660254))
-		# f.write("6 1 6 %f %f 0.0000000\n"%(pos0x+0.5,pos0y-0.8660254))
-		# f.write("7 2 7 %f %f 0.0000000\n"%(pos1x,pos1y))
-		# f.write("8 2 8 %f %f 0.0000000\n"%(pos1x,pos1y+1.0))
-		# f.write("9 2 9 %f %f 0.0000000\n"%(pos1x-0.8660254,pos1y+0.5))
-		# f.write("10 2 10 %f %f 0.0000000\n"%(pos1x-1.73205081,pos1y))
-		# f.write("11 2 11 %f %f 0.0000000\n"%(pos1x-0.8660254,pos1y-0.5))
-		# f.write("12 2 12 %f %f 0.0000000\n\n"%(pos1x,pos1y-1.0))
 		f.write("1 1 1 %f %f 0.0000000\n"%(pos0x,pos0y))
 		f.write("2 1 2 %f %f 0.0000000\n"%(pos0x,pos0y+1.0))
 		f.write("3 1 3 %f %f 0.0000000\n"%(pos0x-0.8660254,pos0y+0.5))
@@ -119,7 +104,6 @@ if config.split('_')[0] == 'FAR':
 		f.write("17 1 7 10\n")
 		f.close()
 	if config.split('_')[1] == 'RB':
-		# print("Right-binding setup")
 		f = open('%s/configuration.dat'%(gpath), 'w')
 		f.write("# Configuration file for the initial conditions of the chevron-like molecules simulations\n\n")
 		f.write("12 atoms\n")
@@ -149,18 +133,6 @@ if config.split('_')[0] == 'FAR':
 		pos1y = 20*(0.5-np.random.random())
 		if np.sqrt((pos0x-pos1x)**2+(pos0y-pos1y)**2) < 2.0:
 			pos0x -= 4.0
-		# f.write("1 1 1 %f %f 0.0000000\n"%(pos0x,pos0y))
-		# f.write("2 1 2 %f %f 0.0000000\n"%(pos0x,pos0y+1.0))
-		# f.write("3 1 3 %f %f 0.0000000\n"%(pos0x-0.8660254,pos0y+0.5))
-		# f.write("4 1 4 %f %f 0.0000000\n"%(pos0x-1.73205081,pos0y))
-		# f.write("5 1 5 %f %f 0.0000000\n"%(pos0x-0.8660254,pos0y-0.5))
-		# f.write("6 1 6 %f %f 0.0000000\n"%(pos0x,pos0y-1.0))
-		# f.write("7 2 7 %f %f 0.0000000\n"%(pos1x,pos1y))
-		# f.write("8 2 8 %f %f 0.0000000\n"%(pos1x+0.5,pos1y+0.8660254))
-		# f.write("9 2 9 %f %f 0.0000000\n"%(pos1x-0.5,pos1y+0.8660254))
-		# f.write("10 2 10 %f %f 0.0000000\n"%(pos1x-1.0,pos1y))
-		# f.write("11 2 11 %f %f 0.0000000\n"%(pos1x-0.5,pos1y-0.8660254))
-		# f.write("12 2 12 %f %f 0.0000000\n\n"%(pos1x+0.5,pos1y-0.8660254))
 		f.write("1 1 1 %f %f 0.0000000\n"%(pos0x,pos0y))
 		f.write("2 1 2 %f %f 0.0000000\n"%(pos0x+0.5,pos0y+0.8660254))
 		f.write("3 1 3 %f %f 0.0000000\n"%(pos0x-0.5,pos0y+0.8660254))
@@ -192,7 +164,6 @@ if config.split('_')[0] == 'FAR':
 		f.write("16 1 11 12\n")
 		f.write("17 1 1 4\n")
 		f.close()
-	print()
 else:
 	if os.access('config_files/%s.config'%(config), os.F_OK):
 		r = os.system('cp config_files/%s.config %s/configuration.dat'%(config,gpath))
