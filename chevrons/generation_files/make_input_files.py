@@ -47,7 +47,7 @@ if config.split('_')[0] == 'FAR':
 	print()
 	print("Generating new config file for FAR setup of binding interactions...")
 	if config.split('_')[1] == 'LB':
-		print("Left-binding setup")
+		# print("Left-binding setup")
 		f = open('%s/configuration.dat'%(gpath), 'w')
 		f.write("# Configuration file for the initial conditions of the chevron-like molecules simulations\n\n")
 		f.write("12 atoms\n")
@@ -119,7 +119,7 @@ if config.split('_')[0] == 'FAR':
 		f.write("17 1 7 10\n")
 		f.close()
 	if config.split('_')[1] == 'RB':
-		print("Right-binding setup")
+		# print("Right-binding setup")
 		f = open('%s/configuration.dat'%(gpath), 'w')
 		f.write("# Configuration file for the initial conditions of the chevron-like molecules simulations\n\n")
 		f.write("12 atoms\n")
@@ -254,16 +254,16 @@ if eps > 0:
 	f.write("pair_coeff          6 11 cosine/squared ${eps} 1.00 ${coff} wca 			# bottom interaction 6-5\n")
 	if config.split('_')[-1] == 'FR' or config.split('_')[0] == 'FAR':
 		f.write("pair_coeff          1 10 cosine/squared ${eps} 1.00 ${coff} wca 			# middle interaction 1-4\n")
-	if epsA > 0:
-		if config.split('_')[1] == 'LB':
-			f.write("pair_coeff          1 4 cosine/squared ${epsA} 1.00 ${coff} wca 			# A pair intra 1-4\n")
-		elif config.split('_')[1] == 'RB':
-			f.write("pair_coeff          7 10 cosine/squared ${epsA} 1.00 ${coff} wca 			# A pair intra 1-4\n")
-	if epsB > 0:
-		if config.split('_')[1] == 'LB':
-			f.write("pair_coeff          3 5 cosine/squared ${epsB} 1.00 ${coff} wca 			# B pair intra 3-5\n")
-		elif config.split('_')[1] == 'RB':
-			f.write("pair_coeff          9 11 cosine/squared ${epsB} 1.00 ${coff} wca 			# B pair intra 3-5\n")
+if epsA > 0:
+	if (len(config.split('_')) > 1 and config.split('_')[1] == 'LB') or config == 'TETRAMER':
+		f.write("pair_coeff          1 4 cosine/squared ${epsA} 1.00 ${coff} wca 			# A pair intra 1-4\n")
+	elif (len(config.split('_')) > 1 and config.split('_')[1] == 'RB'):
+		f.write("pair_coeff          7 10 cosine/squared ${epsA} 1.00 ${coff} wca 			# A pair intra 1-4\n")
+if epsB > 0:
+	if (len(config.split('_')) > 1 and config.split('_')[1] == 'LB') or config == 'TETRAMER' or config == 'DECAMER':
+		f.write("pair_coeff          3 5 cosine/squared ${epsB} 1.00 ${coff} wca 			# B pair intra 3-5\n")
+	elif (len(config.split('_')) > 1 and config.split('_')[1] == 'RB'):
+		f.write("pair_coeff          9 11 cosine/squared ${epsB} 1.00 ${coff} wca 			# B pair intra 3-5\n")
 f.write('''
 fix                 fLang all langevin 1.0 1.0 1.0 ${seed}
 fix                 fNVE all nve
