@@ -50,16 +50,21 @@ def times(path):
 
 if len(sys.argv) < 2:
     print()
-    print("Error! Wrong number of arguments. Please provide: 1) general path to sample")
+    print("Error! Wrong number of arguments. Please provide: 1) general path to sample 2) [y/n] to do the analysis no matter the number of seeds --optional")
     print()
     exit()
 
 gpath = sys.argv[1]
 
 files = glob.glob('%s/sd*/output.xyz'%(gpath))
-print()
-ck = input("%d simulations to analyse! Continue? [y/n] "%(len(files)))
-print()
+
+if len(sys.argv) == 3:
+    ck = sys.argv[2]
+else:
+    print()
+    ck = input("%d simulations to analyse! Continue? [y/n] "%(len(files)))
+    print()
+
 if not (ck == 'y' or ck == 'yes' or ck == 'Y'):
     print("Ok! Aborting...")
     print()
