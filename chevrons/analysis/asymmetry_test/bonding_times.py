@@ -18,7 +18,8 @@ def times(path):
     ff = p.source.num_frames
     nbonds = []
     frames = []
-    for i, f in enumerate(tqdm(range(ff+1))):
+    # for i, f in enumerate(tqdm(range(ff+1))):
+    for f in range(ff+1):
         d = p.compute(f)
         top = np.array(d.particles.bonds['Topology'])
         nbonds.append(len(top))
@@ -29,9 +30,21 @@ def times(path):
 
     nbonds -= nbonds[0]
 
-    tb1 = np.min(frames[nbonds >= 1])
-    tb2 = np.min(frames[nbonds >= 2])
-    tb3 = np.min(frames[nbonds >= 3])
+    if len(frames[nbonds >= 1]) == 0:
+        tb1 = np.nan
+        tb2 = np.nan
+        tb3 = np.nan
+    else:
+        tb1 = np.min(frames[nbonds >= 1])
+        if len(frames[nbonds >= 2]) == 0:
+            tb2 = np.nan
+            tb3 = np.nan
+        else:
+            tb2 = np.min(frames[nbonds >= 2])
+            if len(frames[nbonds >= 3]) == 0:
+                tb3 = np.nan
+            else:
+                tb3 = np.min(frames[nbonds >= 3])
 
     return tb1,tb2,tb3
 
