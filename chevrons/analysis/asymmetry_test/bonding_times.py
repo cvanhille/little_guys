@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from ovito.io import *
+from ovito.modifiers import *
 import sys
 import glob
 from tqdm.auto import tqdm
