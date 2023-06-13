@@ -217,6 +217,7 @@ parser.add_argument('-frate', '--frate', help='frame rate [simulation time units
 parser.add_argument('-sd','--seed', help='random number generator seed', required=False, type=int, default=1234)
 parser.add_argument('-config','--config', help='configuration to simulate - REQUIRED', required=True, type=str)
 parser.add_argument('-bonding','--bonding', help='bonding mode', required=False, action = 'store_true')
+parser.add_argument('-bonds','--bonds', help='number of binding bonds', required=False, type=int, default=5)
 
 args = parser.parse_args()
 gpath = args.path
@@ -233,6 +234,7 @@ runsteps = int(runtime/tstep)
 dump = int(frate/tstep)
 config = args.config
 bonding = args.bonding
+nbonds = int(args.bonds)
 
 np.random.seed(seed)
 
@@ -383,11 +385,21 @@ if epsB > 0:
 		f.write("pair_coeff          9 11 cosine/squared ${epsB} 1.00 ${coff} wca 			# B pair intra 3-5\n")
 if bonding:
 	f.write("\n")
-	f.write("fix					fBindC all bond/create 1 1 4 1.05 1 inter_mol\n")
-	f.write("fix					fBindTS all bond/create 1 2 4 1.05 1 inter_mol\n")
-	f.write("fix					fBindBS all bond/create 1 6 4 1.05 1 inter_mol\n")
-	f.write("fix					fBindTL all bond/create 1 1 3 1.78 2 inter_mol\n")
-	f.write("fix					fBindBL all bond/create 1 1 5 1.78 2 inter_mol\n")
+	if nbonds == 5:
+		f.write("fix					fBindC all bond/create 1 1 4 1.05 1 inter_mol\n")
+		f.write("fix					fBindTS all bond/create 1 2 4 1.05 1 inter_mol\n")
+		f.write("fix					fBindBS all bond/create 1 6 4 1.05 1 inter_mol\n")
+		f.write("fix					fBindTL all bond/create 1 1 3 1.78 2 inter_mol\n")
+		f.write("fix					fBindBL all bond/create 1 1 5 1.78 2 inter_mol\n")
+	if nbonds == 3:
+		f.write("fix					fBindC all bond/create 1 1 4 1.05 1 inter_mol\n")
+		f.write("fix					fBindTS all bond/create 1 2 4 1.05 1 inter_mol\n")
+		f.write("fix					fBindBS all bond/create 1 6 4 1.05 1 inter_mol\n")
+	else:
+		print()
+		print("Error! Wrong number of binding bonds provided!! Check setup...")
+		print()
+		exit()
 f.write('''
 fix                 fLang all langevin 1.0 1.0 1.0 ${seed}
 fix                 fNVE all nve
