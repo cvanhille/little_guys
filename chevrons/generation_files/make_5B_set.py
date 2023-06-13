@@ -16,7 +16,7 @@ parser.add_argument('-frate', '--frate', help='frame rate [simulation time units
 parser.add_argument('-N','--N', help='number of repetitions', required=False, type=int, default=1000)
 parser.add_argument('-config','--config', help='configuration to simulate - REQUIRED', required=True, type=str)
 parser.add_argument('-bonding','--bonding', help='bonding mode', required=False, action = 'store_true')
-parser.add_argument('-bonds','--bonds', help='number of binding bonds', required=False, type=int, default=5)
+parser.add_argument('-bonds','--bonds', help='number of binding bonds [5X, 3X, 3P]', required=False, choices=['5X','3X','3P','3L'], default='5X')
 
 args = parser.parse_args()
 gpath = args.path
@@ -29,7 +29,7 @@ frate = float(args.frate)
 N = int(args.N)
 config = args.config
 bonding = args.bonding
-nbonds = int(args.bonds)
+nbonds = args.bonds
 
 seeds = np.random.randint(0,9000, size = N) + 1000
 
@@ -50,7 +50,7 @@ r = os.system('mkdir %s'%(gpath))
 for i, seed in enumerate(tqdm(seeds)):
 	command = 'python3 make_5B_files.py -p %s/sd%d -config %s -runtime %f -frate %f -Kbond %f -eps %f -epsA %f -epsB %f -sd %d'%(gpath,seed,config,runtime,frate,Kbond,eps,epsA,epsB,seed)
 	if bonding:
-		command = '%s -bonding -bonds %d'%(command,nbonds)
+		command = '%s -bonding -bonds %s'%(command,nbonds)
 	r = os.system(command)
 
 print("Done!")
