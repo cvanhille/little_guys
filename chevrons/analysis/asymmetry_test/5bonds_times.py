@@ -6,7 +6,7 @@ import sys
 import glob
 from tqdm.auto import tqdm
 
-def check_frame(parts, top):
+def check_frame_5X(parts, top):
 
     # Bonds that can form
 
@@ -210,7 +210,271 @@ def check_frame(parts, top):
     
     return LBds, LBbs, RBds, RBbs
 
-def times(path):
+def check_frame_3X(parts, top):
+
+    # Bonds that can form
+
+    # RB:
+    # 1-10 -- straight
+    # 6-10 -- short diagonal bottom
+    # 2-10 -- short diagonal top
+
+    RBds = []
+    RBbs = []
+
+    r = parts[parts[:,0] == 1][:,3:] - parts[parts[:,0] == 10][:,3:]
+    r[r >= 10] -= 20
+    r[r < -10] += 20
+    r = np.linalg.norm(r)
+    RBds.append(r)
+
+    r = parts[parts[:,0] == 6][:,3:] - parts[parts[:,0] == 10][:,3:]
+    r[r >= 10] -= 20
+    r[r < -10] += 20
+    r = np.linalg.norm(r)
+    RBds.append(r)
+
+    r = parts[parts[:,0] == 2][:,3:] - parts[parts[:,0] == 10][:,3:]
+    r[r >= 10] -= 20
+    r[r < -10] += 20
+    r = np.linalg.norm(r)
+    RBds.append(r)
+
+    RBds = np.array(RBds)
+
+    b = 0
+    ts = top[top[:,0] == 1]
+    tss = ts[ts[:,1] == 10]
+    if len(tss) > 0:
+        b = 1
+    ts = top[top[:,1] == 1]
+    tss = ts[ts[:,0] == 10]
+    if len(tss) > 0:
+        b = 1
+    RBbs.append(b)
+
+    b = 0
+    ts = top[top[:,0] == 6]
+    tss = ts[ts[:,1] == 10]
+    if len(tss) > 0:
+        b = 1
+    ts = top[top[:,1] == 6]
+    tss = ts[ts[:,0] == 10]
+    if len(tss) > 0:
+        b = 1
+    RBbs.append(b)
+
+    b = 0
+    ts = top[top[:,0] == 2]
+    tss = ts[ts[:,1] == 10]
+    if len(tss) > 0:
+        b = 1
+    ts = top[top[:,1] == 2]
+    tss = ts[ts[:,0] == 10]
+    if len(tss) > 0:
+        b = 1
+    RBbs.append(b)
+
+    RBbs = np.array(RBbs)
+
+    # LB:
+    # 7-4 -- straight
+    # 12-4 -- short diagonal bottom
+    # 8-4 -- short diagonal top
+    
+    LBds = []
+    LBbs = []
+
+    r = parts[parts[:,0] == 7][:,3:] - parts[parts[:,0] == 4][:,3:]
+    r[r >= 10] -= 20
+    r[r < -10] += 20
+    r = np.linalg.norm(r)
+    LBds.append(r)
+
+    r = parts[parts[:,0] == 12][:,3:] - parts[parts[:,0] == 4][:,3:]
+    r[r >= 10] -= 20
+    r[r < -10] += 20
+    r = np.linalg.norm(r)
+    LBds.append(r)
+
+    r = parts[parts[:,0] == 8][:,3:] - parts[parts[:,0] == 4][:,3:]
+    r[r >= 10] -= 20
+    r[r < -10] += 20
+    r = np.linalg.norm(r)
+    LBds.append(r)
+
+    LBds = np.array(LBds)
+
+    b = 0
+    ts = top[top[:,0] == 7]
+    tss = ts[ts[:,1] == 4]
+    if len(tss) > 0:
+        b = 1
+    ts = top[top[:,1] == 7]
+    tss = ts[ts[:,0] == 4]
+    if len(tss) > 0:
+        b = 1
+    LBbs.append(b)
+
+    b = 0
+    ts = top[top[:,0] == 12]
+    tss = ts[ts[:,1] == 4]
+    if len(tss) > 0:
+        b = 1
+    ts = top[top[:,1] == 12]
+    tss = ts[ts[:,0] == 4]
+    if len(tss) > 0:
+        b = 1
+    LBbs.append(b)
+
+    b = 0
+    ts = top[top[:,0] == 8]
+    tss = ts[ts[:,1] == 4]
+    if len(tss) > 0:
+        b = 1
+    ts = top[top[:,1] == 8]
+    tss = ts[ts[:,0] == 4]
+    if len(tss) > 0:
+        b = 1
+    LBbs.append(b)
+
+    LBbs = np.array(LBbs)
+    
+    return LBds, LBbs, RBds, RBbs
+
+def check_frame_3P(parts, top):
+
+    # Bonds that can form
+
+    # RB:
+    # 1-10 -- straight middle
+    # 2-9 -- straight top
+    # 6-11 -- straight bottom
+
+    RBds = []
+    RBbs = []
+
+    r = parts[parts[:,0] == 1][:,3:] - parts[parts[:,0] == 10][:,3:]
+    r[r >= 10] -= 20
+    r[r < -10] += 20
+    r = np.linalg.norm(r)
+    RBds.append(r)
+
+    r = parts[parts[:,0] == 2][:,3:] - parts[parts[:,0] == 9][:,3:]
+    r[r >= 10] -= 20
+    r[r < -10] += 20
+    r = np.linalg.norm(r)
+    RBds.append(r)
+
+    r = parts[parts[:,0] == 6][:,3:] - parts[parts[:,0] == 11][:,3:]
+    r[r >= 10] -= 20
+    r[r < -10] += 20
+    r = np.linalg.norm(r)
+    RBds.append(r)
+
+    RBds = np.array(RBds)
+
+    b = 0
+    ts = top[top[:,0] == 1]
+    tss = ts[ts[:,1] == 10]
+    if len(tss) > 0:
+        b = 1
+    ts = top[top[:,1] == 1]
+    tss = ts[ts[:,0] == 10]
+    if len(tss) > 0:
+        b = 1
+    RBbs.append(b)
+
+    b = 0
+    ts = top[top[:,0] == 2]
+    tss = ts[ts[:,1] == 9]
+    if len(tss) > 0:
+        b = 1
+    ts = top[top[:,1] == 2]
+    tss = ts[ts[:,0] == 9]
+    if len(tss) > 0:
+        b = 1
+    RBbs.append(b)
+
+    b = 0
+    ts = top[top[:,0] == 6]
+    tss = ts[ts[:,1] == 11]
+    if len(tss) > 0:
+        b = 1
+    ts = top[top[:,1] == 6]
+    tss = ts[ts[:,0] == 11]
+    if len(tss) > 0:
+        b = 1
+    RBbs.append(b)
+
+    RBbs = np.array(RBbs)
+
+    # LB:
+    # 7-4 -- straight middle
+    # 8-3 -- straight diagonal top
+    # 12-5 -- straight diagonal bottom
+    
+    LBds = []
+    LBbs = []
+
+    r = parts[parts[:,0] == 7][:,3:] - parts[parts[:,0] == 4][:,3:]
+    r[r >= 10] -= 20
+    r[r < -10] += 20
+    r = np.linalg.norm(r)
+    LBds.append(r)
+
+    r = parts[parts[:,0] == 8][:,3:] - parts[parts[:,0] == 3][:,3:]
+    r[r >= 10] -= 20
+    r[r < -10] += 20
+    r = np.linalg.norm(r)
+    LBds.append(r)
+
+    r = parts[parts[:,0] == 12][:,3:] - parts[parts[:,0] == 5][:,3:]
+    r[r >= 10] -= 20
+    r[r < -10] += 20
+    r = np.linalg.norm(r)
+    LBds.append(r)
+
+    LBds = np.array(LBds)
+
+    b = 0
+    ts = top[top[:,0] == 7]
+    tss = ts[ts[:,1] == 4]
+    if len(tss) > 0:
+        b = 1
+    ts = top[top[:,1] == 7]
+    tss = ts[ts[:,0] == 4]
+    if len(tss) > 0:
+        b = 1
+    LBbs.append(b)
+
+    b = 0
+    ts = top[top[:,0] == 8]
+    tss = ts[ts[:,1] == 3]
+    if len(tss) > 0:
+        b = 1
+    ts = top[top[:,1] == 8]
+    tss = ts[ts[:,0] == 3]
+    if len(tss) > 0:
+        b = 1
+    LBbs.append(b)
+
+    b = 0
+    ts = top[top[:,0] == 12]
+    tss = ts[ts[:,1] == 5]
+    if len(tss) > 0:
+        b = 1
+    ts = top[top[:,1] == 12]
+    tss = ts[ts[:,0] == 5]
+    if len(tss) > 0:
+        b = 1
+    LBbs.append(b)
+
+    LBbs = np.array(LBbs)
+    
+    return LBds, LBbs, RBds, RBbs
+
+def times(path,mode):
     file = '%s/output.xyz'%(path)
     bonds = '%s/bonds.dump'%(path)
     p = import_file(file)
@@ -241,7 +505,12 @@ def times(path):
         parts[:,4] = pos[:,1]
         top = ids[top]
         # Analyse frame
-        LBds, LBbs, RBds, RBbs = check_frame(parts, top)
+        if mode == '5X':
+            LBds, LBbs, RBds, RBbs = check_frame_5X(parts, top)
+        elif mode == '3X':
+            LBds, LBbs, RBds, RBbs = check_frame_3X(parts, top)
+        if mode == '3P' or mode == '3L':
+            LBds, LBbs, RBds, RBbs = check_frame_3P(parts, top)
         # bondsL.append(LBbs)
         # bondsR.append(RBbs)
         # distsL.append(LBds)
@@ -302,18 +571,24 @@ def times(path):
         Rts.append(np.min(frames[nbndsR>=5]))
     return np.array(Lts), np.array(Rts)
 
-if len(sys.argv) < 2:
+if len(sys.argv) < 3:
     print()
-    print("Error! Wrong number of arguments. Please provide: 1) general path to sample 2) [y/n] to do the analysis no matter the number of seeds --optional")
+    print("Error! Wrong number of arguments. Please provide: 1) general path to sample 2) bond binding mode [5X,3X,3P,3L] 3) [y/n] to do the analysis no matter the number of seeds --optional")
     print()
     exit()
 
 gpath = sys.argv[1]
+mode = sys.argv[2]
+if not (mode == '5X' or mode == '3X' or mode == '3P' or mode == '3L'):
+    print()
+    print("Error! Wrong choice of bond binding mode. Pick from [5X,3X,3P,3L]")
+    print()
+    exit()
 
 files = glob.glob('%s/sd*/output.xyz'%(gpath))
 
-if len(sys.argv) == 3:
-    ck = sys.argv[2]
+if len(sys.argv) == 4:
+    ck = sys.argv[3]
 else:
     print()
     ck = input("%d simulations to analyse! Continue? [y/n] "%(len(files)))
@@ -338,7 +613,7 @@ timeR5 = []
 for i, file in enumerate(tqdm(files)):
     path = file.split('/output.xyz')[0]
     seed = int(path.split('/sd')[1])
-    LTs, RTs = times(path)
+    LTs, RTs = times(path,mode)
     seeds.append(seed)
     timeL1.append(LTs[0])
     timeL2.append(LTs[1])
