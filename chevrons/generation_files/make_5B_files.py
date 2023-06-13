@@ -405,7 +405,7 @@ if bonding:
 		f.write("fix					fBindB all bond/create 1 6 5 1.00 1 inter_mol\n")
 	else:
 		print()
-		print("Error! Wrong number of binding bonds provided!! Check setup...")
+		print("Error! Wrong number of binding bonds provided!! Check setup... -- You provided bonds = %s"%(nbonds))
 		print()
 		exit()
 f.write('''
