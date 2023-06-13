@@ -51,7 +51,7 @@ for i, seed in enumerate(tqdm(seeds)):
 	command = 'python3 make_5B_files.py -p %s/sd%d -config %s -runtime %f -frate %f -Kbond %f -eps %f -epsA %f -epsB %f -sd %d'%(gpath,seed,config,runtime,frate,Kbond,eps,epsA,epsB,seed)
 	if bonding:
 		command = '%s -bonding -bonds %s'%(command,nbonds)
-	print(command)
+	# print(command)
 	r = os.system(command)
 
 print("Done!")
