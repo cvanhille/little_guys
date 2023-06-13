@@ -217,7 +217,7 @@ parser.add_argument('-frate', '--frate', help='frame rate [simulation time units
 parser.add_argument('-sd','--seed', help='random number generator seed', required=False, type=int, default=1234)
 parser.add_argument('-config','--config', help='configuration to simulate - REQUIRED', required=True, type=str)
 parser.add_argument('-bonding','--bonding', help='bonding mode', required=False, action = 'store_true')
-parser.add_argument('-bonds','--bonds', help='number of binding bonds [5X, 3X, 3P]', required=False, choices=['5X','3X','3P','3L'], default='5X')
+parser.add_argument('-bonds','--bonds', help='number of binding bonds [5X, 3X, 3P, 3L]', required=False, choices=['5X','3X','3P','3L'], default='5X')
 
 args = parser.parse_args()
 gpath = args.path
