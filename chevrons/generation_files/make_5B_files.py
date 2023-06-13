@@ -391,15 +391,15 @@ if bonding:
 		f.write("fix					fBindBS all bond/create 1 6 4 1.05 1 inter_mol\n")
 		f.write("fix					fBindTL all bond/create 1 1 3 1.78 2 inter_mol\n")
 		f.write("fix					fBindBL all bond/create 1 1 5 1.78 2 inter_mol\n")
-	if nbonds == '3X':
+	elif nbonds == '3X':
 		f.write("fix					fBindC all bond/create 1 1 4 1.05 1 inter_mol\n")
 		f.write("fix					fBindTS all bond/create 1 2 4 1.05 1 inter_mol\n")
 		f.write("fix					fBindBS all bond/create 1 6 4 1.05 1 inter_mol\n")
-	if nbonds == '3P':
+	elif nbonds == '3P':
 		f.write("fix					fBindC all bond/create 1 1 4 1.05 1 inter_mol\n")
 		f.write("fix					fBindT all bond/create 1 2 3 1.05 1 inter_mol\n")
 		f.write("fix					fBindB all bond/create 1 6 5 1.05 1 inter_mol\n")
-	if nbonds == '3L':
+	elif nbonds == '3L':
 		f.write("fix					fBindC all bond/create 1 1 4 1.20 1 inter_mol\n")
 		f.write("fix					fBindT all bond/create 1 2 3 1.00 1 inter_mol\n")
 		f.write("fix					fBindB all bond/create 1 6 5 1.00 1 inter_mol\n")
