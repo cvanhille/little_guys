@@ -331,7 +331,7 @@ if bonding:
 else:
 	f.write("bonding mode:\t\tFalse\n")
 f.write("bond format:\t\t%s\n"%(nbonds))
-f.write("2-2 repulsion [sigma]: %s"%(repside))
+f.write("2-2 repulsion [sigma]:\t%s\n"%(repside))
 f.close()
 
 f = open('%s/in.local'%(gpath), 'w')
