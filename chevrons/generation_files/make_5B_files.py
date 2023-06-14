@@ -218,6 +218,7 @@ parser.add_argument('-sd','--seed', help='random number generator seed', require
 parser.add_argument('-config','--config', help='configuration to simulate - REQUIRED', required=True, type=str)
 parser.add_argument('-bonding','--bonding', help='bonding mode', required=False, action = 'store_true')
 parser.add_argument('-bonds','--bonds', help='number of binding bonds [5X, 3X, 3P, 3L]', required=False, choices=['5X','3X','3P','3L'], default='5X')
+parser.add_argument('-repside', '--repside', help='EV size for 2-2, 3-3, 5-5 and 6-6 interactions [sigma]', required=False, type=float, default=1.0)
 
 args = parser.parse_args()
 gpath = args.path
@@ -235,6 +236,7 @@ dump = int(frate/tstep)
 config = args.config
 bonding = args.bonding
 nbonds = args.bonds
+repside = float(args.repside)
 
 np.random.seed(seed)
 
@@ -328,6 +330,8 @@ if bonding:
 	f.write("bonding mode:\t\tTrue\n")
 else:
 	f.write("bonding mode:\t\tFalse\n")
+f.write("bond format:\t\t%s\n"%(nbonds))
+f.write("2-2 repulsion [sigma]: %s"%(repside))
 f.close()
 
 f = open('%s/in.local'%(gpath), 'w')
@@ -346,11 +350,12 @@ variable            eps equal %.1f                           	# binding constant
 variable            epsA equal %.1f                           	# binding constant A pair [kT]
 variable            epsB equal %.1f                           	# binding constant B pair [kT]
 variable            coff equal %f                           	# cutoff distance [sigma]
+variable            rdist equal %f                           	# cutoff distance [sigma]
 variable            tstep equal %f                             	# simulation timestep size [seconds]
 variable            seed equal %d                               	# random number generator seed
 variable            run_steps equal %d          					# simulation run time [simulation steps]
 variable            dump_time equal %d        						# dumping interval [simulation steps]
-'''%(Kbond,eps,epsA,epsB,coff,tstep,seed,runsteps,dump))
+'''%(Kbond,eps,epsA,epsB,coff,repside,tstep,seed,runsteps,dump))
 f.write('''
 special_bonds       lj 1.0 1.0 1.0
 bond_style          harmonic
@@ -361,6 +366,10 @@ pair_style          hybrid/overlay zero 2.00 cosine/squared 2.00
 pair_coeff          * * cosine/squared 0.00 1.00 1.10
 pair_coeff          * * zero 2.00
 pair_coeff          * * cosine/squared 1.00 1.00 1.00 wca
+pair_coeff          2 2 cosine/squared 1.00 ${rdist} ${rdist} wca
+pair_coeff          3 3 cosine/squared 1.00 ${rdist} ${rdist} wca
+pair_coeff          5 5 cosine/squared 1.00 ${rdist} ${rdist} wca
+pair_coeff          6 6 cosine/squared 1.00 ${rdist} ${rdist} wca
 ''')
 if eps > 0:
 	f.write("pair_coeff          2 9 cosine/squared ${eps} 1.00 ${coff} wca 			# top interaction 2-3\n")
