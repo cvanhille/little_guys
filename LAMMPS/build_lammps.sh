@@ -28,13 +28,13 @@ fi
 
 echo "Copying modified LAMMPS function files and compiling..."
 
-if [ ! -f $LAMMPSDIR/src/lmp_mpi ]; then
+if [ ! -f $LAMMPSDIR/src/lmp_serial ]; then
         cp -rf $MODFILESDIR/fix_bond_create.cpp $LAMMPSDIR/src/MC
         cp -rf $MODFILESDIR/fix_bond_create.h $LAMMPSDIR/src/MC
 	cd $LAMMPSDIR/src
 	make clean-all
 	make yes-EXTRA-PAIR yes-MC yes-MISC yes-MOLECULE yes-REACTION yes-RIGID
-	make mpi
+	make serial
 	cd "$WDIR"
 else
         echo "Existing LAMMPS executable found! If you are unsure about which version it is delete the ./lammps directory and rerun this program"
