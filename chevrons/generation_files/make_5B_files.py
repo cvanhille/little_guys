@@ -280,6 +280,7 @@ if config.split('_')[0] == '2MOLS':
 	f.write("Atoms\n\n")
 	for i in range(len(X)):
 		f.write("%d %d %d %f %f 0.0000000\n"%(ids[i],mols[i],types[i],X[i],Y[i]))
+	f.write('\n')
 	f.write("Bonds\n\n")
 	f.write("1 1 1 2\n")
 	f.write("2 1 1 3\n")
