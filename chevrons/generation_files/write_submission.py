@@ -2,7 +2,7 @@ import sys
 import glob
 import os
 
-wd = os.get_cwd()
+wd = os.getcwd()
 command = '%s/LAMMPS/lammps/src/lmp_mpi -in in.local'%(wd.split('/chevrons/')[0])
 
 gpath = input("What is the general path to this simulation set? (please include full tree!) ")
