@@ -2,7 +2,8 @@ import sys
 import glob
 import os
 
-command = '/nfs/scistore15/saricgrp/cvanhill/software/lammps-3Nov2022/src/lmp_serial -in in.local'
+wd = os.get_cwd()
+command = '%s/LAMMPS/lammps/src/lmp_mpi -in in.local'%(wd.split('/chevrons/')[0])
 
 gpath = input("What is the general path to this simulation set? (please include full tree!) ")
 print("OK! Will move to %s"%(gpath))
