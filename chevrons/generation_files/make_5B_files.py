@@ -493,6 +493,8 @@ if epsA > 0:
 	elif (len(config.split('_')) > 1 and config.split('_')[1] == 'LBF') or (len(config.split('_')) > 1 and config.split('_')[1] == 'RBF'):
 		f.write("pair_coeff          1 4 cosine/squared ${epsA} 1.00 ${coff} wca 			# A pair intra 1-4\n")
 		f.write("pair_coeff          7 10 cosine/squared ${epsA} 1.00 ${coff} wca 			# A pair intra 1-4\n")
+	else:
+		f.write("pair_coeff          1 4 cosine/squared ${epsA} 1.00 ${coff} wca 			# A pair intra 1-4\n")
 if epsB > 0:
 	if (len(config.split('_')) > 1 and config.split('_')[1] == 'LB') or config == 'TETRAMER' or config == 'DECAMER':
 		f.write("pair_coeff          3 5 cosine/squared ${epsB} 1.00 ${coff} wca 			# B pair intra 3-5\n")
@@ -501,6 +503,8 @@ if epsB > 0:
 	elif (len(config.split('_')) > 1 and config.split('_')[1] == 'LBF') or (len(config.split('_')) > 1 and config.split('_')[1] == 'RBF'):
 		f.write("pair_coeff          3 5 cosine/squared ${epsB} 1.00 ${coff} wca 			# B pair intra 3-5\n")
 		f.write("pair_coeff          9 11 cosine/squared ${epsB} 1.00 ${coff} wca 			# B pair intra 3-5\n")
+	else:
+		f.write("pair_coeff          3 5 cosine/squared ${epsB} 1.00 ${coff} wca 			# B pair intra 3-5\n")
 if bonding:
 	f.write("\n")
 	if nbonds == '5X':
