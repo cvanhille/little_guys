@@ -14,7 +14,7 @@ parser.add_argument('-epsB', '--epsB', help='binding constant for intra perp pai
 parser.add_argument('-runtime', '--runtime', help='simulation run time [simulation time units]', required=False, type=float, default=2000.0)
 parser.add_argument('-frate', '--frate', help='frame rate [simulation time units]', required=False, type=float, default=1.0)
 parser.add_argument('-N','--N', help='number of repetitions', required=False, type=int, default=1000)
-parser.add_argument('-config','--config', help='configuration to simulate - REQUIRED', required=True, type=str)
+parser.add_argument('-config','--config', help='configuration to simulate - REQUIRED - recommend 2MOLS_C-B_R', required=True, type=str)
 parser.add_argument('-bonding','--bonding', help='bonding mode', required=False, action = 'store_true')
 parser.add_argument('-bonds','--bonds', help='number of binding bonds [5X, 3X, 3P, 3L]', required=False, choices=['5X','3X','3P','3L'], default='3P')
 parser.add_argument('-repside', '--repside', help='EV size for 2-2, 3-3, 5-5 and 6-6 interactions [sigma]', required=False, type=float, default=1.0)
