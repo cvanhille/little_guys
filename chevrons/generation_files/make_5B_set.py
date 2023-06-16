@@ -63,7 +63,7 @@ if os.access(gpath, os.F_OK):
 r = os.system('mkdir %s'%(gpath))
 
 for i, seed in enumerate(tqdm(seeds)):
-	command = 'python3 make_5B_files.py -p %s/sd%d -config %s -runtime %f -frate %f -Kbond %f -eps %f -epsA %f -epsB %f -repside %f -sd %d -phi %f -L %f'%(gpath,seed,config,runtime,frate,Kbond,eps,epsA,epsB,repside,seed,phi,L)
+	command = 'python3 make_5B_files.py -p %s/sd%d -config %s -runtime %f -frate %f -Kbond %f -eps %f -epsA %f -epsB %f -repside %f -phi %f -L %f -sd %d'%(gpath,seed,config,runtime,frate,Kbond,eps,epsA,epsB,repside,phi,L,seed)
 	if bonding:
 		command = '%s -bonding -bonds %s'%(command,nbonds)
 	if capside:
