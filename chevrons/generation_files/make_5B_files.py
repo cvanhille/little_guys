@@ -416,7 +416,7 @@ def setup_Nmols(L, phi, capside):
 			nys = ys[dr2 > 9.0]
 		xs = nxs.copy()
 		ys = nys.copy()
-	print("Created %d molecules -> phi = %.4f particles / sigma2"%(nmols, (len(allI)*np.pi)/(4*L*L)))
+	# print("Created %d molecules -> phi = %.4f particles / sigma2"%(nmols, (len(allI)*np.pi)/(4*L*L)))
 	return allI, allT, allM, allX, allY, maxIDfreeze, bonds
 
 parser = argparse.ArgumentParser(description='')
