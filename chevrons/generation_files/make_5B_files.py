@@ -4,7 +4,7 @@ import argparse
 import os
 import glob
 
-def shape(X0,Y0,key,L,capside):
+def shape(X0,Y0,key,L,capside,orkey):
 	Xs = [X0]
 	Ys = [Y0]
 	if capside:
@@ -19,7 +19,10 @@ def shape(X0,Y0,key,L,capside):
 		rs = 0.0
 	elif key == 'TRIANGLE' or key == 'TRI' or key == 'T':
 		rs = 1.0
-	rd = np.random.randint(6)
+	if orkey == 'RNDM' or orkey == 'R' or orkey == 'RANDOM':
+		rd = np.random.randint(6)
+	else:
+		rd = int(orkey)
 	if rs < 0.5:
 		# Cat
 		# Bead 2
@@ -239,7 +242,7 @@ def setup_2mols(L, key1, key2,capside):
 	idx = np.random.randint(len(xs))
 	X0 = xs[idx]
 	Y0 = ys[idx]
-	Xs, Ys, ids, types = shape(X0,Y0,key1,L,capside)
+	Xs, Ys, ids, types = shape(X0,Y0,key1,L,capside,'R')
 	# Empty safe space
 	dxs = xs-X0
 	dys = ys-Y0
@@ -254,13 +257,167 @@ def setup_2mols(L, key1, key2,capside):
 	idx = np.random.randint(len(nxs))
 	nX0 = nxs[idx]
 	nY0 = nys[idx]
-	nXs, nYs, nids, ntypes = shape(nX0,nY0,key2,L,capside)
+	nXs, nYs, nids, ntypes = shape(nX0,nY0,key2,L,capside,'R')
 	# Assemble
 	fids = np.concatenate((ids,nids+ids.max()))
 	ftypes = np.concatenate((types,ntypes))
 	fX = np.concatenate((Xs,nXs))
 	fY = np.concatenate((Ys,nYs))
 	return fids, ftypes, fX, fY
+
+def setup_Nmols(L, phi, capside):
+	# Set up the lattice
+	x0 = -L/2.0
+	y0 = -L/2.0
+	dx = 1.0
+	dy = 2*np.cos(np.pi/6)
+	ddx = np.sin(np.pi/6)
+	ddy = np.cos(np.pi/6)
+	nrows = int(np.floor(L/dy))
+	ncols = int(np.floor(L/dx))
+	if L-ncols*dx < ddx:
+		ncols -= 1
+	xs = []
+	ys = []
+	for nr in range(nrows):
+		for nc in range(ncols):
+			xs.append(x0+nc*dx)
+			ys.append(y0+nr*dy)
+			xs.append(x0+nc*dx+ddx)
+			ys.append(y0+nr*dy+ddy)
+	xs = np.array(xs)
+	ys = np.array(ys)
+	xs += (L/2.0-xs.max())/2.0
+	ys += (L/2.0-ys.max())/2.0
+	# Create molecules
+	nmols = 0
+	allX = []
+	allY = []
+	allI = []
+	allT = []
+	allM = []
+	bonds = []
+	nbonds = 0
+	# Substrate molecules: nrows frozen at x = 0
+	# while nmols < nrows:
+	Y0 = y0
+	while Y0 < L/2.0-10.0:
+		maxID = 0
+		if len(allI) > 0:
+			maxID = np.max(allI)
+		X0 = 0
+		Y0 = y0+nmols*5.0
+		Xs, Ys, ids, types = shape(X0,Y0,'C',L,capside,'4')
+		mols = (nmols+1)*np.ones(len(ids))
+		allI = np.concatenate((allI,ids+maxID))
+		allT = np.concatenate((allT,types))
+		allX = np.concatenate((allX,Xs))
+		allY = np.concatenate((allY,Ys))
+		allM = np.concatenate((allM,mols))
+		nmols += 1
+		if capside:
+			bonds.append('%d 1 %d %d'%(nbonds+1, maxID+1, maxID+2))
+			bonds.append('%d 1 %d %d'%(nbonds+2, maxID+1, maxID+3))
+			bonds.append('%d 1 %d %d'%(nbonds+3, maxID+1, maxID+5))
+			bonds.append('%d 1 %d %d'%(nbonds+4, maxID+1, maxID+6))
+			bonds.append('%d 1 %d %d'%(nbonds+5, maxID+2, maxID+3))
+			bonds.append('%d 1 %d %d'%(nbonds+6, maxID+3, maxID+4))
+			bonds.append('%d 1 %d %d'%(nbonds+7, maxID+4, maxID+5))
+			bonds.append('%d 1 %d %d'%(nbonds+8, maxID+5, maxID+6))
+			bonds.append('%d 1 %d %d'%(nbonds+9, maxID+2, maxID+7))
+			bonds.append('%d 1 %d %d'%(nbonds+10, maxID+3, maxID+7))
+			bonds.append('%d 1 %d %d'%(nbonds+11, maxID+5, maxID+8))
+			bonds.append('%d 1 %d %d'%(nbonds+12, maxID+6, maxID+8))
+			nbonds += 12
+		else:
+			bonds.append('%d 1 %d %d'%(nbonds+1, maxID+1, maxID+2))
+			bonds.append('%d 1 %d %d'%(nbonds+2, maxID+1, maxID+3))
+			bonds.append('%d 1 %d %d'%(nbonds+3, maxID+1, maxID+5))
+			bonds.append('%d 1 %d %d'%(nbonds+4, maxID+1, maxID+6))
+			bonds.append('%d 1 %d %d'%(nbonds+5, maxID+2, maxID+3))
+			bonds.append('%d 1 %d %d'%(nbonds+6, maxID+3, maxID+4))
+			bonds.append('%d 1 %d %d'%(nbonds+7, maxID+4, maxID+5))
+			bonds.append('%d 1 %d %d'%(nbonds+8, maxID+5, maxID+6))
+			nbonds += 8
+		# Empty safe space
+		dxs = xs-X0
+		dys = ys-Y0
+		dxs[dxs < -L/2.0] += L
+		dxs[dxs >= L/2.0] -= L
+		dys[dys < -L/2.0] += L
+		dys[dys >= L/2.0] -= L
+		dr2 = dxs*dxs+dys*dys
+		if capside:
+			nxs = xs[dr2 > 16.0]
+			nys = ys[dr2 > 16.0]
+		else:
+			nxs = xs[dr2 > 9.0]
+			nys = ys[dr2 > 9.0]
+		xs = nxs.copy()
+		ys = nys.copy()
+	ymax = np.max(allY[allT == 1])
+	dymax = L/2.0-ymax
+	allY += dymax/2.0
+	print(ymax, dymax, np.max(allY[allT == 1]))
+	maxIDfreeze = np.max(allI)
+	ppm = 6
+	if capside:
+		ppm = 8
+	while nmols < (4*L*L*phi)/(np.pi*ppm):
+		maxID = np.max(allI)
+		idx = np.random.randint(len(xs))
+		X0 = xs[idx]
+		Y0 = ys[idx]
+		Xs, Ys, ids, types = shape(X0,Y0,'R',L,capside,'R')
+		mols = (nmols+1)*np.ones(len(ids))
+		allI = np.concatenate((allI,ids+maxID))
+		allT = np.concatenate((allT,types))
+		allX = np.concatenate((allX,Xs))
+		allY = np.concatenate((allY,Ys))
+		allM = np.concatenate((allM,mols))
+		nmols += 1
+		if capside:
+			bonds.append('%d 1 %d %d'%(nbonds+1, maxID+1, maxID+2))
+			bonds.append('%d 1 %d %d'%(nbonds+2, maxID+1, maxID+3))
+			bonds.append('%d 1 %d %d'%(nbonds+3, maxID+1, maxID+5))
+			bonds.append('%d 1 %d %d'%(nbonds+4, maxID+1, maxID+6))
+			bonds.append('%d 1 %d %d'%(nbonds+5, maxID+2, maxID+3))
+			bonds.append('%d 1 %d %d'%(nbonds+6, maxID+3, maxID+4))
+			bonds.append('%d 1 %d %d'%(nbonds+7, maxID+4, maxID+5))
+			bonds.append('%d 1 %d %d'%(nbonds+8, maxID+5, maxID+6))
+			bonds.append('%d 1 %d %d'%(nbonds+9, maxID+2, maxID+7))
+			bonds.append('%d 1 %d %d'%(nbonds+10, maxID+3, maxID+7))
+			bonds.append('%d 1 %d %d'%(nbonds+11, maxID+5, maxID+8))
+			bonds.append('%d 1 %d %d'%(nbonds+12, maxID+6, maxID+8))
+			nbonds += 12
+		else:
+			bonds.append('%d 1 %d %d'%(nbonds+1, maxID+1, maxID+2))
+			bonds.append('%d 1 %d %d'%(nbonds+2, maxID+1, maxID+3))
+			bonds.append('%d 1 %d %d'%(nbonds+3, maxID+1, maxID+5))
+			bonds.append('%d 1 %d %d'%(nbonds+4, maxID+1, maxID+6))
+			bonds.append('%d 1 %d %d'%(nbonds+5, maxID+2, maxID+3))
+			bonds.append('%d 1 %d %d'%(nbonds+6, maxID+3, maxID+4))
+			bonds.append('%d 1 %d %d'%(nbonds+7, maxID+4, maxID+5))
+			bonds.append('%d 1 %d %d'%(nbonds+8, maxID+5, maxID+6))
+			nbonds += 8
+		# Empty safe space
+		dxs = xs-X0
+		dys = ys-Y0
+		dxs[dxs < -L/2.0] += L
+		dxs[dxs >= L/2.0] -= L
+		dys[dys < -L/2.0] += L
+		dys[dys >= L/2.0] -= L
+		dr2 = dxs*dxs+dys*dys
+		if capside:
+			nxs = xs[dr2 > 16.0]
+			nys = ys[dr2 > 16.0]
+		else:
+			nxs = xs[dr2 > 9.0]
+			nys = ys[dr2 > 9.0]
+		xs = nxs.copy()
+		ys = nys.copy()
+	print("Created %d molecules -> phi = %.4f particles / sigma2"%(nmols, (len(allI)*np.pi)/(4*L*L)))
+	return allI, allT, allM, allX, allY, maxIDfreeze, bonds
 
 parser = argparse.ArgumentParser(description='')
 parser.add_argument('-p', '--path', help='path to simulation folder - REQUIRED', required=True, type=str)
@@ -278,6 +435,8 @@ parser.add_argument('-bonding','--bonding', help='bonding mode', required=False,
 parser.add_argument('-bonds','--bonds', help='number of binding bonds [5X, 3X, 3P, 3L]', required=False, choices=['5X','3X','3P','3L'], default='3P')
 parser.add_argument('-repside', '--repside', help='EV size for 2-2, 3-3, 5-5 and 6-6 interactions [sigma]', required=False, type=float, default=1.0)
 parser.add_argument('-capside','--capside', help='cap the side of the molecule', required=False, action = 'store_true')
+parser.add_argument('-phi', '--phi', help='area fraction', required=False, type=float, default=0.0)
+parser.add_argument('-L', '--L', help='box size', required=False, type=float, default=0.0)
 
 args = parser.parse_args()
 gpath = args.path
@@ -297,6 +456,8 @@ bonding = args.bonding
 nbonds = args.bonds
 repside = float(args.repside)
 capside = args.capside
+phi = float(args.phi)
+L = float(args.L)
 
 np.random.seed(seed)
 
@@ -310,6 +471,7 @@ else:
 	exit()
 
 if config.split('_')[0] == '2MOLS':
+	L = 10
 	ids, types, X, Y = setup_2mols(20, config.split('_')[1].split('-')[0], config.split('_')[2], capside)
 	if (not len(ids) == 12 and not capside) or (capside and not len(ids) == 16):
 		print()
@@ -409,7 +571,46 @@ if config.split('_')[0] == '2MOLS':
 		if config.split('_')[1].split('-')[1] == 'B':
 			f.write("17 1 1 4\n")
 	f.close()
+elif config == 'NMOLS_FREEZE':
+	if phi == 0 or L == 0:
+		print()
+		print("Error! Missing L and phi arguments! Aborting!!")
+		print()
+		exit()
+	ids, types, mols, X, Y, maxIDfreeze, bonds = setup_Nmols(L, phi, capside)
+	f = open('%s/configuration.dat'%(gpath), 'w')
+	f.write("# Configuration file for the initial conditions of the chevron-like molecules simulations\n\n")
+	f.write("%d atoms\n"%(len(ids)))
+	f.write("%d bonds\n"%(len(bonds)))
+	if capside:
+		f.write("7 atom types\n")
+	else:
+		f.write("6 atom types\n")
+	f.write("2 bond types\n")
+	f.write("-%f %f xlo xhi\n"%(L/2.0,L/2.0))
+	f.write("-%f %f ylo yhi\n"%(L/2.0,L/2.0))
+	f.write("-0.25 0.25 zlo zhi\n\n")
+	f.write("Masses\n\n")
+	f.write("1 1\n")
+	f.write("2 1\n")
+	f.write("3 1\n")
+	f.write("4 1\n")
+	f.write("5 1\n")
+	if capside:
+		f.write("6 1\n")
+		f.write("7 1\n\n")
+	else:
+		f.write("6 1\n\n")
+	f.write("Atoms\n\n")
+	for i in range(len(X)):
+		f.write("%d %d %d %f %f 0.0000000\n"%(ids[i],mols[i],types[i],X[i],Y[i]))
+	f.write('\n')
+	f.write("Bonds\n\n")
+	for i in range(len(bonds)):
+		f.write("%s\n"%(bonds[i]))
+	f.close()
 else:
+	L = 10
 	if os.access('config_files/%s.config'%(config), os.F_OK):
 		r = os.system('cp config_files/%s.config %s/configuration.dat'%(config,gpath))
 	else:
@@ -425,6 +626,7 @@ else:
 
 f = open('%s/info.txt'%(gpath), 'w')
 f.write("path:\t\t\t%s\n"%(gpath))
+f.write("L [sigma]:\t\t%.2f\n"%(L))
 f.write("Kbond [kT/sigma2]:\t%.1f\n"%(Kbond))
 f.write("eps [kT]:\t\t%.1f\n"%(eps))
 f.write("epsA [kT]:\t\t%.1f\n"%(epsA))
@@ -441,6 +643,14 @@ else:
 	f.write("bonding mode:\t\tFalse\n")
 f.write("bond format:\t\t%s\n"%(nbonds))
 f.write("2-2 repulsion [sigma]:\t%s\n"%(repside))
+if capside:
+	f.write("Caps on side:\t\tTrue\n")
+else:
+	f.write("Caps on side:\t\tFalse\n")
+if phi == 0:
+	f.write("Area fraction:\t\tNo imposition\n")
+else:
+	f.write("Area fraction:\t\t%.2f\n"%(phi))
 f.close()
 
 f = open('%s/in.local'%(gpath), 'w')
@@ -454,6 +664,12 @@ log                 log.txt
 read_data           configuration.dat''')
 if bonding:
 	f.write("  extra/bond/per/atom 5  extra/special/per/atom 20  extra/angle/per/atom 3\n\n")
+else:
+	f.write("\n\n")
+if config == 'NMOLS_FREEZE':
+	f.write("group               moving id > %d\n\n"%(maxIDfreeze))
+else:
+	f.write("group               moving all\n\n"%(maxIDfreeze))
 f.write('''variable            Kbond equal %.1f                           	# bond constant [kT/sigma2]
 variable            eps equal %.1f                           	# binding constant [kT]
 variable            epsA equal %.1f                           	# binding constant A pair [kT]
@@ -531,8 +747,8 @@ if bonding:
 		print()
 		exit()
 f.write('''
-fix                 fLang all langevin 1.0 1.0 1.0 ${seed}
-fix                 fNVE all nve
+fix                 fLang moving langevin 1.0 1.0 1.0 ${seed}
+fix                 fNVE moving nve
 
 dump                1 all custom ${dump_time} output.xyz id mol type x y
 dump_modify         1 format line "%d %d %d %.2f %.2f"
@@ -542,10 +758,18 @@ thermo_style        custom step temp pe ke etotal epair ebond press vol density 
 
 compute             cBonds all property/local batom1 batom2 btype
 compute             cBondDxys all bond/local engpot force dist
-
+''')
+if config == 'NMOLS_FREEZE':
+	f.write('''
+dump                2 all local ${dump_time} bonds.dump c_cBonds[*]
+dump_modify         2 format line "%f %f %f"
+''')
+else:
+	f.write('''
 dump                2 all local ${dump_time} bonds.dump c_cBonds[*] c_cBondDxys[*]
 dump_modify         2 format line "%f %f %f %.2f %.2f %.2f"
-
+''')
+f.write('''
 fix                 twodim all enforce2d
 
 timestep            ${tstep}
