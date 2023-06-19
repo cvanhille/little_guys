@@ -109,7 +109,8 @@ for i, file in enumerate(tqdm(files[:10])):
     cseeds = np.concatenate((cseeds, csds))
     tseeds = np.concatenate((tseeds, tsds))
 
-print(len(seeds), len(ctimes), len(ttimes))
+print(len(cseeds), len(ctimes))
+print(len(tseeds), len(ttimes))
 
 data = pd.DataFrame(index = np.arange(len(cseeds)), columns = ['seed','time'])
 data['seed'] = cseeds
