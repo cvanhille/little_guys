@@ -667,9 +667,9 @@ elif config == 'NMOLS_FREEZE':
 elif config == '1MOL':
 	if L == 0:
 		L = 5
-		print()
-		print("Setting box size L = 5 for single molecule simulation... (default, specify L in arguments otherwise)")
-		print()
+		# print()
+		# print("Setting box size L = 5 for single molecule simulation... (default, specify L in arguments otherwise)")
+		# print()
 		# print()
 		# print("Error! Missing L argument! Aborting!!")
 		# print()
