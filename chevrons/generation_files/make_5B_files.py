@@ -215,6 +215,61 @@ def shape(X0,Y0,key,L,capside,orkey):
 	Ys = np.array(Ys)
 	return Xs, Ys, ids, types
 
+def setup_1mols(L, capside):
+	# Set up the lattice
+	x0 = -L/2.0
+	y0 = -L/2.0
+	dx = 1.0
+	dy = 2*np.cos(np.pi/6)
+	ddx = np.sin(np.pi/6)
+	ddy = np.cos(np.pi/6)
+	nrows = int(np.floor(L/dy))
+	ncols = int(np.floor(L/dx))
+	if L-ncols*dx < ddx:
+		ncols -= 1
+	xs = []
+	ys = []
+	for nr in range(nrows):
+		for nc in range(ncols):
+			xs.append(x0+nc*dx)
+			ys.append(y0+nr*dy)
+			xs.append(x0+nc*dx+ddx)
+			ys.append(y0+nr*dy+ddy)
+	xs = np.array(xs)
+	ys = np.array(ys)
+	xs += (L/2.0-xs.max())/2.0
+	ys += (L/2.0-ys.max())/2.0
+	# Create molecule
+	idx = np.random.randint(len(xs))
+	X0 = xs[idx]
+	Y0 = ys[idx]
+	Xs, Ys, ids, types = shape(X0,Y0,'R',L,capside,'R')
+	mols = np.ones(len(ids))
+	bonds = []
+	if capside:
+		bonds.append('%d 1 %d %d'%(1, 1, 2))
+		bonds.append('%d 1 %d %d'%(2, 1, 3))
+		bonds.append('%d 1 %d %d'%(3, 1, 5))
+		bonds.append('%d 1 %d %d'%(4, 1, 6))
+		bonds.append('%d 1 %d %d'%(5, 2, 3))
+		bonds.append('%d 1 %d %d'%(6, 3, 4))
+		bonds.append('%d 1 %d %d'%(7, 4, 5))
+		bonds.append('%d 1 %d %d'%(8, 5, 6))
+		bonds.append('%d 1 %d %d'%(9, 2, 7))
+		bonds.append('%d 1 %d %d'%(10, 3, 7))
+		bonds.append('%d 1 %d %d'%(11, 5, 8))
+		bonds.append('%d 1 %d %d'%(12, 6, 8))
+	else:
+		bonds.append('%d 1 %d %d'%(1, 1, 2))
+		bonds.append('%d 1 %d %d'%(2, 1, 3))
+		bonds.append('%d 1 %d %d'%(3, 1, 5))
+		bonds.append('%d 1 %d %d'%(4, 1, 6))
+		bonds.append('%d 1 %d %d'%(5, 2, 3))
+		bonds.append('%d 1 %d %d'%(6, 3, 4))
+		bonds.append('%d 1 %d %d'%(7, 4, 5))
+		bonds.append('%d 1 %d %d'%(8, 5, 6))
+	return ids, types, mols, Xs, Ys, bonds
+
 def setup_2mols(L, key1, key2,capside):
 	x0 = -L/2.0
 	y0 = -L/2.0
@@ -358,7 +413,7 @@ def setup_Nmols(L, phi, capside):
 	ymax = np.max(allY[allT == 1])
 	dymax = L/2.0-ymax
 	allY += dymax/2.0
-	print(ymax, dymax, np.max(allY[allT == 1]))
+	# print(ymax, dymax, np.max(allY[allT == 1]))
 	maxIDfreeze = np.max(allI)
 	ppm = 6
 	if capside:
@@ -436,7 +491,7 @@ parser.add_argument('-bonds','--bonds', help='number of binding bonds [5X, 3X, 3
 parser.add_argument('-repside', '--repside', help='EV size for 2-2, 3-3, 5-5 and 6-6 interactions [sigma]', required=False, type=float, default=1.0)
 parser.add_argument('-capside','--capside', help='cap the side of the molecule', required=False, action = 'store_true')
 parser.add_argument('-phi', '--phi', help='area fraction', required=False, type=float, default=0.0)
-parser.add_argument('-L', '--L', help='box size', required=False, type=float, default=0.0)
+parser.add_argument('-L', '--L', help='box size --if 1MOL config and no spec then L = 5 sigma', required=False, type=float, default=0.0)
 
 args = parser.parse_args()
 gpath = args.path
@@ -609,6 +664,48 @@ elif config == 'NMOLS_FREEZE':
 	for i in range(len(bonds)):
 		f.write("%s\n"%(bonds[i]))
 	f.close()
+elif config == '1MOL':
+	if L == 0:
+		L = 5
+		print()
+		print("Setting box size L = 5 for single molecule simulation... (default, specify L in arguments otherwise)")
+		print()
+		# print()
+		# print("Error! Missing L argument! Aborting!!")
+		# print()
+		# exit()
+	ids, types, mols, X, Y, bonds = setup_1mols(L, capside)
+	f = open('%s/configuration.dat'%(gpath), 'w')
+	f.write("# Configuration file for the initial conditions of the chevron-like molecules simulations\n\n")
+	f.write("%d atoms\n"%(len(ids)))
+	f.write("%d bonds\n"%(len(bonds)))
+	if capside:
+		f.write("7 atom types\n")
+	else:
+		f.write("6 atom types\n")
+	f.write("2 bond types\n")
+	f.write("-%f %f xlo xhi\n"%(L/2.0,L/2.0))
+	f.write("-%f %f ylo yhi\n"%(L/2.0,L/2.0))
+	f.write("-0.25 0.25 zlo zhi\n\n")
+	f.write("Masses\n\n")
+	f.write("1 1\n")
+	f.write("2 1\n")
+	f.write("3 1\n")
+	f.write("4 1\n")
+	f.write("5 1\n")
+	if capside:
+		f.write("6 1\n")
+		f.write("7 1\n\n")
+	else:
+		f.write("6 1\n\n")
+	f.write("Atoms\n\n")
+	for i in range(len(X)):
+		f.write("%d %d %d %f %f 0.0000000\n"%(ids[i],mols[i],types[i],X[i],Y[i]))
+	f.write('\n')
+	f.write("Bonds\n\n")
+	for i in range(len(bonds)):
+		f.write("%s\n"%(bonds[i]))
+	f.close()
 else:
 	L = 10
 	if os.access('config_files/%s.config'%(config), os.F_OK):
@@ -669,7 +766,7 @@ else:
 if config == 'NMOLS_FREEZE':
 	f.write("group               moving id > %d\n\n"%(maxIDfreeze))
 else:
-	f.write("group               moving all\n\n"%(maxIDfreeze))
+	f.write("group               moving id > 0\n\n")
 f.write('''variable            Kbond equal %.1f                           	# bond constant [kT/sigma2]
 variable            eps equal %.1f                           	# binding constant [kT]
 variable            epsA equal %.1f                           	# binding constant A pair [kT]
