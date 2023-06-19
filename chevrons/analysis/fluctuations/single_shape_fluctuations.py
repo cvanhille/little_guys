@@ -91,25 +91,32 @@ gpath = sys.argv[1]
 
 files = glob.glob('%s/sd*/output.xyz'%(gpath)) 
 
-seeds = []
+cseeds = []
 ctimes = []
+tseeds = []
 ttimes = []
-for i, file in enumerate(tqdm(files)):
+for i, file in enumerate(tqdm(files[:10])):
 
     p = import_file(file)
 
     ctimesS, ttimesS = ats(p)
     seed = int(file.split('/')[-2].split('sd')[1])
-    sds = seed*np.ones(len(ctimesS))
+    csds = seed*np.ones(len(ctimesS))
+    tsds = seed*np.ones(len(ttimesS))
 
     ctimes = np.concatenate((ctimes, ctimesS))
     ttimes = np.concatenate((ttimes, ttimesS))
-    seeds = np.concatenate((seeds, sds))
+    cseeds = np.concatenate((cseeds, csds))
+    tseeds = np.concatenate((tseeds, tsds))
 
 print(len(seeds), len(ctimes), len(ttimes))
 
-data = pd.DataFrame(index = np.arange(len(seeds)), columns = ['seed','ctime','ttime'])
-data['seed'] = seeds
-data['ctime'] = ctimes
-data['ttime'] = ttimes
-data.to_csv('%s/fluctuations.txt'%(gpath))
+data = pd.DataFrame(index = np.arange(len(cseeds)), columns = ['seed','time'])
+data['seed'] = cseeds
+data['time'] = ctimes
+data.to_csv('%s/chevron_times.txt'%(gpath))
+
+data = pd.DataFrame(index = np.arange(len(tseeds)), columns = ['seed','time'])
+data['seed'] = tseeds
+data['time'] = ttimes
+data.to_csv('%s/triangle_times.txt'%(gpath))
