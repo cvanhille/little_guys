@@ -990,10 +990,10 @@ thermo_style        custom step temp pe ke etotal epair ebond press vol density 
 compute             cBonds all property/local batom1 batom2 btype
 compute             cBondDxys all bond/local engpot force dist
 ''')
-if config == 'NMOLS_FREEZE':
+if config == 'NMOLS_FREEZE' or config == 'NMOLS':
 	f.write('''
 dump                2 all local ${dump_time} bonds.dump c_cBonds[*]
-dump_modify         2 format line "%f %f %f"
+dump_modify         2 format line "%.1f %.1f %.1f"
 ''')
 else:
 	f.write('''
