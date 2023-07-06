@@ -39,7 +39,7 @@ capside = args.capside
 phi = float(args.phi)
 L = float(args.L)
 
-if config == 'NMOLS_FREEZE':
+if config == 'NMOLS_FREEZE' or config == 'NMOLS':
 	if phi == 0 or L == 0:
 		print()
 		print("Error! Missing L and phi arguments! Aborting!!")

@@ -320,7 +320,7 @@ def setup_2mols(L, key1, key2,capside):
 	fY = np.concatenate((Ys,nYs))
 	return fids, ftypes, fX, fY
 
-def setup_Nmols(L, phi, capside):
+def setup_NmolsFreeze(L, phi, capside):
 	# Set up the lattice
 	x0 = -L/2.0
 	y0 = -L/2.0
@@ -473,6 +473,102 @@ def setup_Nmols(L, phi, capside):
 		ys = nys.copy()
 	# print("Created %d molecules -> phi = %.4f particles / sigma2"%(nmols, (len(allI)*np.pi)/(4*L*L)))
 	return allI, allT, allM, allX, allY, maxIDfreeze, bonds
+
+def setup_Nmols(L, phi, capside):
+	# Set up the lattice
+	x0 = -L/2.0
+	y0 = -L/2.0
+	dx = 1.0
+	dy = 2*np.cos(np.pi/6)
+	ddx = np.sin(np.pi/6)
+	ddy = np.cos(np.pi/6)
+	nrows = int(np.floor(L/dy))
+	ncols = int(np.floor(L/dx))
+	if L-ncols*dx < ddx:
+		ncols -= 1
+	xs = []
+	ys = []
+	for nr in range(nrows):
+		for nc in range(ncols):
+			xs.append(x0+nc*dx)
+			ys.append(y0+nr*dy)
+			xs.append(x0+nc*dx+ddx)
+			ys.append(y0+nr*dy+ddy)
+	xs = np.array(xs)
+	ys = np.array(ys)
+	xs += (L/2.0-xs.max())/2.0
+	ys += (L/2.0-ys.max())/2.0
+	# Create molecules
+	nmols = 0
+	allX = []
+	allY = []
+	allI = []
+	allT = []
+	allM = []
+	bonds = []
+	nbonds = 0
+	# Create molecules:
+	# while nmols < max nmols:
+	ppm = 6
+	if capside:
+		ppm = 8
+	maxID = 0
+	while nmols < (4*L*L*phi)/(np.pi*ppm):
+		if len(allI) > 0:
+			maxID = np.max(allI)
+		idx = np.random.randint(len(xs))
+		X0 = xs[idx]
+		Y0 = ys[idx]
+		Xs, Ys, ids, types = shape(X0,Y0,'R',L,capside,'R')
+		mols = (nmols+1)*np.ones(len(ids))
+		allI = np.concatenate((allI,ids+maxID))
+		allT = np.concatenate((allT,types))
+		allX = np.concatenate((allX,Xs))
+		allY = np.concatenate((allY,Ys))
+		allM = np.concatenate((allM,mols))
+		nmols += 1
+		if capside:
+			bonds.append('%d 1 %d %d'%(nbonds+1, maxID+1, maxID+2))
+			bonds.append('%d 1 %d %d'%(nbonds+2, maxID+1, maxID+3))
+			bonds.append('%d 1 %d %d'%(nbonds+3, maxID+1, maxID+5))
+			bonds.append('%d 1 %d %d'%(nbonds+4, maxID+1, maxID+6))
+			bonds.append('%d 1 %d %d'%(nbonds+5, maxID+2, maxID+3))
+			bonds.append('%d 1 %d %d'%(nbonds+6, maxID+3, maxID+4))
+			bonds.append('%d 1 %d %d'%(nbonds+7, maxID+4, maxID+5))
+			bonds.append('%d 1 %d %d'%(nbonds+8, maxID+5, maxID+6))
+			bonds.append('%d 1 %d %d'%(nbonds+9, maxID+2, maxID+7))
+			bonds.append('%d 1 %d %d'%(nbonds+10, maxID+3, maxID+7))
+			bonds.append('%d 1 %d %d'%(nbonds+11, maxID+5, maxID+8))
+			bonds.append('%d 1 %d %d'%(nbonds+12, maxID+6, maxID+8))
+			nbonds += 12
+		else:
+			bonds.append('%d 1 %d %d'%(nbonds+1, maxID+1, maxID+2))
+			bonds.append('%d 1 %d %d'%(nbonds+2, maxID+1, maxID+3))
+			bonds.append('%d 1 %d %d'%(nbonds+3, maxID+1, maxID+5))
+			bonds.append('%d 1 %d %d'%(nbonds+4, maxID+1, maxID+6))
+			bonds.append('%d 1 %d %d'%(nbonds+5, maxID+2, maxID+3))
+			bonds.append('%d 1 %d %d'%(nbonds+6, maxID+3, maxID+4))
+			bonds.append('%d 1 %d %d'%(nbonds+7, maxID+4, maxID+5))
+			bonds.append('%d 1 %d %d'%(nbonds+8, maxID+5, maxID+6))
+			nbonds += 8
+		# Empty safe space
+		dxs = xs-X0
+		dys = ys-Y0
+		dxs[dxs < -L/2.0] += L
+		dxs[dxs >= L/2.0] -= L
+		dys[dys < -L/2.0] += L
+		dys[dys >= L/2.0] -= L
+		dr2 = dxs*dxs+dys*dys
+		if capside:
+			nxs = xs[dr2 > 16.0]
+			nys = ys[dr2 > 16.0]
+		else:
+			nxs = xs[dr2 > 9.0]
+			nys = ys[dr2 > 9.0]
+		xs = nxs.copy()
+		ys = nys.copy()
+	# print("Created %d molecules -> phi = %.4f particles / sigma2"%(nmols, (len(allI)*np.pi)/(4*L*L)))
+	return allI, allT, allM, allX, allY, bonds
 
 parser = argparse.ArgumentParser(description='')
 parser.add_argument('-p', '--path', help='path to simulation folder - REQUIRED', required=True, type=str)
@@ -632,7 +728,45 @@ elif config == 'NMOLS_FREEZE':
 		print("Error! Missing L and phi arguments! Aborting!!")
 		print()
 		exit()
-	ids, types, mols, X, Y, maxIDfreeze, bonds = setup_Nmols(L, phi, capside)
+	ids, types, mols, X, Y, maxIDfreeze, bonds = setup_NmolsFreeze(L, phi, capside)
+	f = open('%s/configuration.dat'%(gpath), 'w')
+	f.write("# Configuration file for the initial conditions of the chevron-like molecules simulations\n\n")
+	f.write("%d atoms\n"%(len(ids)))
+	f.write("%d bonds\n"%(len(bonds)))
+	if capside:
+		f.write("7 atom types\n")
+	else:
+		f.write("6 atom types\n")
+	f.write("2 bond types\n")
+	f.write("-%f %f xlo xhi\n"%(L/2.0,L/2.0))
+	f.write("-%f %f ylo yhi\n"%(L/2.0,L/2.0))
+	f.write("-0.25 0.25 zlo zhi\n\n")
+	f.write("Masses\n\n")
+	f.write("1 1\n")
+	f.write("2 1\n")
+	f.write("3 1\n")
+	f.write("4 1\n")
+	f.write("5 1\n")
+	if capside:
+		f.write("6 1\n")
+		f.write("7 1\n\n")
+	else:
+		f.write("6 1\n\n")
+	f.write("Atoms\n\n")
+	for i in range(len(X)):
+		f.write("%d %d %d %f %f 0.0000000\n"%(ids[i],mols[i],types[i],X[i],Y[i]))
+	f.write('\n')
+	f.write("Bonds\n\n")
+	for i in range(len(bonds)):
+		f.write("%s\n"%(bonds[i]))
+	f.close()
+elif config == 'NMOLS':
+	if phi == 0 or L == 0:
+		print()
+		print("Error! Missing L and phi arguments! Aborting!!")
+		print()
+		exit()
+	ids, types, mols, X, Y, bonds = setup_Nmols(L, phi, capside)
 	f = open('%s/configuration.dat'%(gpath), 'w')
 	f.write("# Configuration file for the initial conditions of the chevron-like molecules simulations\n\n")
 	f.write("%d atoms\n"%(len(ids)))
