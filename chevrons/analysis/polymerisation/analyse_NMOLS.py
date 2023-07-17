@@ -92,10 +92,10 @@ def chains_in_frame(p, f):
 
 def analyse(path, gpath):
 
-    tic = time.perf_counter()
+    # tic = time.perf_counter()
 
     spath = path.split(gpath)[1]
-    print(spath)
+    # print(spath)
 
     file = '%s/output.xyz'%(path)
     bonds = '%s/bonds.dump'%(path)
@@ -193,7 +193,7 @@ def analyse(path, gpath):
                             heads += 1
                             hts.append(f)
                             mhts.append(80-pms)
-                            fl.write('Head growth at time %.1f - '%(f))
+                            fl.write('Head growth at time %.1f - ['%(f))
                             for ci in interacts[0]:
                                 fl.write('%d '%(ci))
                             fl.write('] -> [')
@@ -204,7 +204,7 @@ def analyse(path, gpath):
                             tails += 1
                             tts.append(f)
                             mtts.append(80-pms)
-                            fl.write('Tail growth at time %.1f - '%(f))
+                            fl.write('Tail growth at time %.1f - ['%(f))
                             for ci in interacts[0]:
                                 fl.write('%d '%(ci))
                             fl.write('] -> [')
@@ -215,7 +215,7 @@ def analyse(path, gpath):
                         merges += 1
                         mts.append(f)
                         mmts.append(80-pms)
-                        fl.write('Merging at time %.1f - '%(f))
+                        fl.write('Merging at time %.1f - ['%(f))
                         for ci in interacts[0]:
                             fl.write('%d '%(ci))
                         fl.write('] + [')
@@ -273,19 +273,19 @@ def analyse(path, gpath):
     data['nuc_mols'].iloc[:len(mnts)] = mnts
     data.to_csv('%s/polymerisation_analysis_results/%s.txt'%(gpath,spath))
 
-    print()
-    print("%d head polymerisation events in %d tau -- %.4f events/tau"%(heads, f, heads/f))
-    print("%d tail polymerisation events in %d tau -- %.4f events/tau"%(tails, f, tails/f))
-    print("%d merging events in %d tau -- %.4f events/tau"%(merges, f, merges/f))
-    print("%d nucleation events in %d tau -- %.4f events/tau -- %.2f tau on average"%(nucs, f, nucs/f, np.nanmean(nts[1:])))
-    print("   ", heads/tails, "H/T ratio")
-    print("   ", heads/nucs, "H/N ratio")
-    print("   ", heads/merges, "H/M ratio")
-    print("   ", tails/merges, "T/M ratio")
+    # print()
+    # print("%d head polymerisation events in %d tau -- %.4f events/tau"%(heads, f, heads/f))
+    # print("%d tail polymerisation events in %d tau -- %.4f events/tau"%(tails, f, tails/f))
+    # print("%d merging events in %d tau -- %.4f events/tau"%(merges, f, merges/f))
+    # print("%d nucleation events in %d tau -- %.4f events/tau -- %.2f tau on average"%(nucs, f, nucs/f, np.nanmean(nts[1:])))
+    # print("   ", heads/tails, "H/T ratio")
+    # print("   ", heads/nucs, "H/N ratio")
+    # print("   ", heads/merges, "H/M ratio")
+    # print("   ", tails/merges, "T/M ratio")
 
-    toc = time.perf_counter()
-    print()
-    print(toc-tic, 'seconds elapsed')
+    # toc = time.perf_counter()
+    # print()
+    # print(toc-tic, 'seconds elapsed')
     
     return
 
@@ -299,9 +299,10 @@ gpath = sys.argv[1]
 
 files = glob.glob('%s/sd*/output.xyz'%(gpath))
 
-r = os.system('mkdir %s/polymerisation_analysis_events'%(gpath))
-r = os.system('mkdir %s/polymerisation_analysis_timeseries'%(gpath))
-r = os.system('mkdir %s/polymerisation_analysis_results'%(gpath))
+if not os.access('%s/polymerisation_analysis_events'%(gpath), os.F_OK):
+    r = os.system('mkdir %s/polymerisation_analysis_events'%(gpath))
+    r = os.system('mkdir %s/polymerisation_analysis_timeseries'%(gpath))
+    r = os.system('mkdir %s/polymerisation_analysis_results'%(gpath))
 
 for i, file in enumerate(tqdm(files)):
     path = file.split('/output.xyz')[0]
