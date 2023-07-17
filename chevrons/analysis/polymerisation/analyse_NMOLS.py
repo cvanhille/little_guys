@@ -92,10 +92,7 @@ def chains_in_frame(p, f):
 
 def analyse(path, gpath):
 
-    # tic = time.perf_counter()
-
     spath = path.split(gpath)[1]
-    # print(spath)
 
     file = '%s/output.xyz'%(path)
     bonds = '%s/bonds.dump'%(path)
@@ -272,20 +269,6 @@ def analyse(path, gpath):
     data['merge_mols'].iloc[:len(mmts)] = mmts
     data['nuc_mols'].iloc[:len(mnts)] = mnts
     data.to_csv('%s/polymerisation_analysis_results/%s.txt'%(gpath,spath))
-
-    # print()
-    # print("%d head polymerisation events in %d tau -- %.4f events/tau"%(heads, f, heads/f))
-    # print("%d tail polymerisation events in %d tau -- %.4f events/tau"%(tails, f, tails/f))
-    # print("%d merging events in %d tau -- %.4f events/tau"%(merges, f, merges/f))
-    # print("%d nucleation events in %d tau -- %.4f events/tau -- %.2f tau on average"%(nucs, f, nucs/f, np.nanmean(nts[1:])))
-    # print("   ", heads/tails, "H/T ratio")
-    # print("   ", heads/nucs, "H/N ratio")
-    # print("   ", heads/merges, "H/M ratio")
-    # print("   ", tails/merges, "T/M ratio")
-
-    # toc = time.perf_counter()
-    # print()
-    # print(toc-tic, 'seconds elapsed')
     
     return
 
@@ -306,4 +289,6 @@ if not os.access('%s/polymerisation_analysis_events'%(gpath), os.F_OK):
 
 for i, file in enumerate(tqdm(files)):
     path = file.split('/output.xyz')[0]
+    if os.access('%s/polymerisation_analysis_results/%s.txt'%(gpath,path.split(gpath)[1]), os.F_OK):
+        continue
     analyse(path, gpath)
