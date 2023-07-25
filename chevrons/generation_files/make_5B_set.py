@@ -11,6 +11,7 @@ parser.add_argument('-Kbond', '--Kbond', help='bond constant [kT/sigma2]', requi
 parser.add_argument('-eps', '--eps', help='binding constant [kT]', required=False, type=float, default=0.0)
 parser.add_argument('-epsA', '--epsA', help='binding constant for intra line pair [kT]', required=False, type=float, default=0.0)
 parser.add_argument('-epsB', '--epsB', help='binding constant for intra perp pair [kT]', required=False, type=float, default=0.0)
+parser.add_argument('-coff', '--coff', help='cutoff distance [sigma]', required=False, type=float, default=1.2)
 parser.add_argument('-runtime', '--runtime', help='simulation run time [simulation time units]', required=False, type=float, default=2000.0)
 parser.add_argument('-frate', '--frate', help='frame rate [simulation time units]', required=False, type=float, default=1.0)
 parser.add_argument('-N','--N', help='number of repetitions', required=False, type=int, default=1000)
@@ -28,6 +29,7 @@ Kbond = float(args.Kbond)
 eps = float(args.eps)
 epsA = float(args.epsA)
 epsB = float(args.epsB)
+coff = float(args.coff)
 runtime = float(args.runtime)
 frate = float(args.frate)
 N = int(args.N)
@@ -63,7 +65,7 @@ if os.access(gpath, os.F_OK):
 r = os.system('mkdir %s'%(gpath))
 
 for i, seed in enumerate(tqdm(seeds)):
-	command = 'python3 make_5B_files.py -p %s/sd%d -config %s -runtime %f -frate %f -Kbond %f -eps %f -epsA %f -epsB %f -repside %f -phi %f -L %f -sd %d'%(gpath,seed,config,runtime,frate,Kbond,eps,epsA,epsB,repside,phi,L,seed)
+	command = 'python3 make_5B_files.py -p %s/sd%d -config %s -runtime %f -frate %f -Kbond %f -eps %f -epsA %f -epsB %f -coff %f -repside %f -phi %f -L %f -sd %d'%(gpath,seed,config,runtime,frate,Kbond,eps,epsA,epsB,coff,repside,phi,L,seed)
 	if bonding:
 		command = '%s -bonding -bonds %s'%(command,nbonds)
 	if capside:
