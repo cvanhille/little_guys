@@ -913,7 +913,7 @@ variable            run_steps equal %d          					# simulation run time [simu
 variable            dump_time equal %d        						# dumping interval [simulation steps]
 '''%(Kbond,eps,epsA,epsB,coff,repside,tstep,seed,runsteps,dump))
 f.write('''
-special_bonds       lj 1.0 1.0 1.0
+special_bonds       lj 0.0 1.0 1.0
 bond_style          harmonic
 bond_coeff          1 ${Kbond} 1.0
 bond_coeff          2 ${Kbond} 1.7320508075688774
@@ -928,10 +928,10 @@ pair_coeff          5 5 cosine/squared 1.00 ${rdist} ${rdist} wca
 pair_coeff          6 6 cosine/squared 1.00 ${rdist} ${rdist} wca
 ''')
 if eps > 0:
-	f.write("pair_coeff          2 9 cosine/squared ${eps} 1.00 ${coff} wca 			# top interaction 2-3\n")
-	f.write("pair_coeff          6 11 cosine/squared ${eps} 1.00 ${coff} wca 			# bottom interaction 6-5\n")
+	f.write("pair_coeff          2 3 cosine/squared ${eps} 1.00 ${coff} wca 			# top interaction 2-3\n")
+	f.write("pair_coeff          6 5 cosine/squared ${eps} 1.00 ${coff} wca 			# bottom interaction 6-5\n")
 	if config.split('_')[-1] == 'FR' or config.split('_')[0] == 'FAR':
-		f.write("pair_coeff          1 10 cosine/squared ${eps} 1.00 ${coff} wca 			# middle interaction 1-4\n")
+		f.write("pair_coeff          1 4 cosine/squared ${eps} 1.00 ${coff} wca 			# middle interaction 1-4\n")
 if epsA > 0:
 	if (len(config.split('_')) > 1 and config.split('_')[1] == 'LB') or config == 'TETRAMER' or config == 'DECAMER':
 		f.write("pair_coeff          1 4 cosine/squared ${epsA} 1.00 ${coff} wca 			# A pair intra 1-4\n")
@@ -978,11 +978,13 @@ if bonding:
 		print()
 		exit()
 f.write('''
+compute             cPE all pe/atom pair
+
 fix                 fLang moving langevin 1.0 1.0 1.0 ${seed}
 fix                 fNVE moving nve
 
-dump                1 all custom ${dump_time} output.xyz id mol type x y
-dump_modify         1 format line "%d %d %d %.2f %.2f"
+dump                1 all custom ${dump_time} output.xyz id mol type x y c_cPE
+dump_modify         1 format line "%d %d %d %.2f %.2f %.2f"
 
 thermo              ${dump_time}
 thermo_style        custom step temp pe ke etotal epair ebond press vol density atoms
@@ -993,12 +995,16 @@ compute             cBondDxys all bond/local engpot force dist
 if config == 'NMOLS_FREEZE' or config == 'NMOLS':
 	f.write('''
 dump                2 all local ${dump_time} bonds.dump c_cBonds[*]
-dump_modify         2 format line "%.1f %.1f %.1f"
+dump_modify         2 format line "%.0f %.0f %.0f"
 ''')
 else:
+# 	f.write('''
+# dump                2 all local ${dump_time} bonds.dump c_cBonds[*] c_cBondDxys[*]
+# dump_modify         2 format line "%f %f %f %.2f %.2f %.2f"
+# ''')
 	f.write('''
-dump                2 all local ${dump_time} bonds.dump c_cBonds[*] c_cBondDxys[*]
-dump_modify         2 format line "%f %f %f %.2f %.2f %.2f"
+dump                2 all local ${dump_time} bonds.dump c_cBonds[*]
+dump_modify         2 format line "%.0f %.0f %.0f"
 ''')
 f.write('''
 fix                 twodim all enforce2d
