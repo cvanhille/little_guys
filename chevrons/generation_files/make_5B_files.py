@@ -413,6 +413,8 @@ def setup_NmolsFreeze(L, phi, capside):
 	ymax = np.max(allY[allT == 1])
 	dymax = L/2.0-ymax
 	allY += dymax/2.0
+	allY[allY >= L/2.0] -= L
+	allY[allY < -L/2.0] += L
 	# print(ymax, dymax, np.max(allY[allT == 1]))
 	maxIDfreeze = np.max(allI)
 	ppm = 6
@@ -423,6 +425,14 @@ def setup_NmolsFreeze(L, phi, capside):
 		idx = np.random.randint(len(xs))
 		X0 = xs[idx]
 		Y0 = ys[idx]
+		if X0 <= -L/2+2.5 or X0 >= L/2-2.5 or Y0 <= -L/2+2.5 or Y0 >= L/2-2.5:
+			continue
+		if nmols%2 == 0:	#even - only left side (X < 0)
+			if X0 > 0:
+				continue
+		else:				#uneven - only right side (X > 0)
+			if X0 < 0:
+				continue
 		Xs, Ys, ids, types = shape(X0,Y0,'R',L,capside,'R')
 		mols = (nmols+1)*np.ones(len(ids))
 		allI = np.concatenate((allI,ids+maxID))
@@ -890,8 +900,12 @@ f.write('''# Input script for LAMMPS simulation of individual chevron-like molec
 units               lj
 atom_style          molecular
 dimension           2 
-boundary            p p p
-log                 log.txt
+''')
+if config == 'NMOLS_FREEZE': 
+	f.write("boundary            f f p\n")
+else:
+	f.write("boundary            p p p\n")
+f.write('''log                 log.txt
 read_data           configuration.dat''')
 if bonding:
 	f.write("  extra/bond/per/atom 5  extra/special/per/atom 20  extra/angle/per/atom 3\n\n")
@@ -979,7 +993,10 @@ if bonding:
 		exit()
 f.write('''
 compute             cPE all pe/atom pair
-
+''')
+if config == 'NMOLS_FREEZE':
+	f.write("fix                 walls all wall/reflect xlo EDGE xhi EDGE ylo EDGE yhi EDGE\n")
+f.write('''
 fix                 fLang moving langevin 1.0 1.0 1.0 ${seed}
 fix                 fNVE moving nve
 
