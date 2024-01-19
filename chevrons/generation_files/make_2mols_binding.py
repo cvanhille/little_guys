@@ -269,8 +269,8 @@ parser = argparse.ArgumentParser(description='')
 parser.add_argument('-p', '--path', help='path to simulation folder - REQUIRED', required=True, type=str)
 parser.add_argument('-Kbond', '--Kbond', help='bond constant [kT/sigma2]', required=False, type=float, default=500.0)
 parser.add_argument('-eps', '--eps', help='binding constant [kT]', required=False, type=float, default=0.0)
-parser.add_argument('-epsA', '--epsA', help='binding constant for intra line pair [kT]', required=False, type=float, default=0.0)
-parser.add_argument('-epsB', '--epsB', help='binding constant for intra perp pair [kT]', required=False, type=float, default=0.0)
+parser.add_argument('-epsC', '--epsC', help='binding constant for chevron shape pair [kT]', required=False, type=float, default=0.0)
+parser.add_argument('-epsT', '--epsT', help='binding constant for triangle shape pair [kT]', required=False, type=float, default=0.0)
 parser.add_argument('-coff', '--coff', help='cutoff distance [sigma]', required=False, type=float, default=1.2)
 parser.add_argument('-bcoff', '--bcoff', help='bound label cutoff distance [sigma]', required=False, type=float, default=1.1)
 parser.add_argument('-tstep', '--tstep', help='simulation timestep [simulation time units]', required=False, type=float, default=0.01)
@@ -283,8 +283,8 @@ args = parser.parse_args()
 gpath = args.path
 Kbond = float(args.Kbond)
 eps = float(args.eps)
-epsA = float(args.epsA)
-epsB = float(args.epsB)
+epsC = float(args.epsC)
+epsT = float(args.epsT)
 coff = float(args.coff)
 bcoff = float(args.bcoff)
 tstep = float(args.tstep)
@@ -369,8 +369,8 @@ f.write("path:\t\t\t%s\n"%(gpath))
 f.write("L [sigma]:\t\t%.2f\n"%(L))
 f.write("Kbond [kT/sigma2]:\t%.1f\n"%(Kbond))
 f.write("eps [kT]:\t\t%.1f\n"%(eps))
-f.write("epsA [kT]:\t\t%.1f\n"%(epsA))
-f.write("epsB [kT]:\t\t%.1f\n"%(epsB))
+f.write("epsC [kT]:\t\t%.1f\n"%(epsC))
+f.write("epsT [kT]:\t\t%.1f\n"%(epsT))
 f.write("coff [sigma]:\t\t%f\n"%(coff))
 f.write("bcoff [sigma]:\t\t%f\n"%(bcoff))
 f.write("tstep [tau]:\t\t%.5f\n"%(tstep))
@@ -395,8 +395,8 @@ group               moving id > 0
 
 variable            Kbond equal %.1f                           	# bond constant [kT/sigma2]
 variable            eps equal %.1f                           	# binding constant [kT]
-variable            epsA equal %.1f                           	# binding constant A pair [kT]
-variable            epsB equal %.1f                           	# binding constant B pair [kT]
+variable            epsC equal %.1f                           	# binding constant chevron shape pair [kT]
+variable            epsT equal %.1f                           	# binding constant triangle shape pair [kT]
 variable            coff equal %f                           	# cutoff distance [sigma]
 variable            bcoff equal %f                           	# cutoff distance [sigma]
 variable            rdist equal 1.0                           	# cutoff distance [sigma]
@@ -404,7 +404,7 @@ variable            tstep equal %f                             	# simulation tim
 variable            seed equal %d                               	# random number generator seed
 variable            run_steps equal %d          					# simulation run time [simulation steps]
 variable            dump_steps equal %d        						# dumping interval [simulation steps]
-'''%(Kbond,eps,epsA,epsB,coff,bcoff,tstep,seed,runsteps,dump))
+'''%(Kbond,eps,epsC,epsT,coff,bcoff,tstep,seed,runsteps,dump))
 f.write('''
 special_bonds       lj 0.0 1.0 1.0
 bond_style          harmonic
@@ -419,10 +419,22 @@ pair_coeff          2 2 cosine/squared 1.00 ${rdist} ${rdist} wca
 pair_coeff          3 3 cosine/squared 1.00 ${rdist} ${rdist} wca
 pair_coeff          5 5 cosine/squared 1.00 ${rdist} ${rdist} wca
 pair_coeff          6 6 cosine/squared 1.00 ${rdist} ${rdist} wca
-pair_coeff          2 3 cosine/squared ${eps} 1.00 ${coff} wca 			# top interaction 2-3
-pair_coeff          6 5 cosine/squared ${eps} 1.00 ${coff} wca 			# bottom interaction 6-5
-pair_coeff          3 5 cosine/squared ${epsB} 1.00 ${coff} wca 			# B pair intra 3-5
-
+''')
+if eps == 0:
+	f.write("pair_coeff          2 3 cosine/squared 1.00 ${rdist} ${rdist} wca 			# top interaction 2-3 - only EV\n")
+	f.write("pair_coeff          6 5 cosine/squared 1.00 ${rdist} ${rdist} wca 			# bottom interaction 6-5 - only EV\n")
+else:
+	f.write("pair_coeff          2 3 cosine/squared ${eps} 1.00 ${coff} wca 			# top interaction 2-3\n")
+	f.write("pair_coeff          6 5 cosine/squared ${eps} 1.00 ${coff} wca 			# bottom interaction 6-5\n")
+if epsC == 0:
+	f.write("pair_coeff          1 4 cosine/squared 1.00 ${rdist} ${rdist} wca 			# chevron shape pair intra 1-4 - only EV\n")
+else:
+	f.write("pair_coeff          1 4 cosine/squared ${epsC} 1.00 ${coff} wca 			# chevron shape pair intra 1-4\n")
+if epsT == 0:
+	f.write("pair_coeff          3 5 cosine/squared 1.00 ${rdist} ${rdist} wca 			# triangle shape pair intra 3-5 - only EV\n")
+else:
+	f.write("pair_coeff          3 5 cosine/squared ${epsT} 1.00 ${coff} wca 			# triangle shape pair intra 3-5\n")
+f.write('''
 compute             cPE all pe/atom pair
 compute             cN2 all coord/atom cutoff ${bcoff} 2
 compute             cN3 all coord/atom cutoff ${bcoff} 3
@@ -447,7 +459,7 @@ thermo_style        custom step temp pe ke etotal epair ebond press atoms v_vTI 
 compute             cBonds all property/local batom1 batom2 btype
 compute             cBondDxys all bond/local engpot force dist
 
-dump                2 all local ${run_steps} bonds_1.dump c_cBonds[*]
+dump                2 all local ${run_steps} bonds_0.dump c_cBonds[*]
 dump_modify         2 format line "%.0f %.0f %.0f" first yes
 
 fix                 twodim all enforce2d
@@ -461,7 +473,7 @@ run                 ${run_steps}
 dump                3 all custom ${run_steps} output_1.xyz id mol type x y c_cPE v_vN2 v_vN3 v_vN5 v_vN6
 dump_modify         3 format line "%d %d %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f" first yes
 
-dump                4 all local ${run_steps} bonds_2.dump c_cBonds[*]
+dump                4 all local ${run_steps} bonds_1.dump c_cBonds[*]
 dump_modify         4 format line "%.0f %.0f %.0f" first yes
 
 timestep            ${tstep}
@@ -483,8 +495,8 @@ group               moving id > 0
 
 variable            Kbond equal %.1f                           	# bond constant [kT/sigma2]
 variable            eps equal %.1f                           	# binding constant [kT]
-variable            epsA equal %.1f                           	# binding constant A pair [kT]
-variable            epsB equal %.1f                           	# binding constant B pair [kT]
+variable            epsC equal %.1f                           	# binding constant chevron shape pair [kT]
+variable            epsT equal %.1f                           	# binding constant triangle shape pair [kT]
 variable            coff equal %f                           	# cutoff distance [sigma]
 variable            bcoff equal %f                           	# cutoff distance [sigma]
 variable            rdist equal 1.0                           	# cutoff distance [sigma]
@@ -492,7 +504,7 @@ variable            tstep equal %f                             	# simulation tim
 variable            seed equal %d                               	# random number generator seed
 variable            run_steps equal %d          					# simulation run time [simulation steps]
 variable            dump_steps equal %d        						# dumping interval [simulation steps]
-'''%(Kbond,eps,epsA,epsB,coff,bcoff,tstep,seed,runsteps,dump))
+'''%(Kbond,eps,epsC,epsT,coff,bcoff,tstep,seed,runsteps,dump))
 f.write('''
 special_bonds       lj 0.0 1.0 1.0
 bond_style          harmonic
@@ -507,10 +519,22 @@ pair_coeff          2 2 cosine/squared 1.00 ${rdist} ${rdist} wca
 pair_coeff          3 3 cosine/squared 1.00 ${rdist} ${rdist} wca
 pair_coeff          5 5 cosine/squared 1.00 ${rdist} ${rdist} wca
 pair_coeff          6 6 cosine/squared 1.00 ${rdist} ${rdist} wca
-pair_coeff          2 3 cosine/squared ${eps} 1.00 ${coff} wca 			# top interaction 2-3
-pair_coeff          6 5 cosine/squared ${eps} 1.00 ${coff} wca 			# bottom interaction 6-5
-pair_coeff          3 5 cosine/squared ${epsB} 1.00 ${coff} wca 			# B pair intra 3-5
-
+''')
+if eps == 0:
+	f.write("pair_coeff          2 3 cosine/squared 1.00 ${rdist} ${rdist} wca 			# top interaction 2-3 - only EV\n")
+	f.write("pair_coeff          6 5 cosine/squared 1.00 ${rdist} ${rdist} wca 			# bottom interaction 6-5 - only EV\n")
+else:
+	f.write("pair_coeff          2 3 cosine/squared ${eps} 1.00 ${coff} wca 			# top interaction 2-3\n")
+	f.write("pair_coeff          6 5 cosine/squared ${eps} 1.00 ${coff} wca 			# bottom interaction 6-5\n")
+if epsC == 0:
+	f.write("pair_coeff          1 4 cosine/squared 1.00 ${rdist} ${rdist} wca 			# chevron shape pair intra 1-4 - only EV\n")
+else:
+	f.write("pair_coeff          1 4 cosine/squared ${epsC} 1.00 ${coff} wca 			# chevron shape pair intra 1-4\n")
+if epsT == 0:
+	f.write("pair_coeff          3 5 cosine/squared 1.00 ${rdist} ${rdist} wca 			# triangle shape pair intra 3-5 - only EV\n")
+else:
+	f.write("pair_coeff          3 5 cosine/squared ${epsT} 1.00 ${coff} wca 			# triangle shape pair intra 3-5\n")
+f.write('''
 compute             cPE all pe/atom pair
 compute             cN2 all coord/atom cutoff ${bcoff} 2
 compute             cN3 all coord/atom cutoff ${bcoff} 3
