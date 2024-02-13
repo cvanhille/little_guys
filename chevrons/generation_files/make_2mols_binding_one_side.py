@@ -13,7 +13,7 @@ def shape(X0,Y0,key,L,capside,orkey,which_side_binds):
 	else:
 		ids = np.array([1,2,3,4,5,6])
 		types = np.array([1,2,3,4,5,6])
-	if which_side_binds == 'B' or which_side_binds == 'T': #
+	if which_side_binds == 'B' or which_side_binds == 'T': #change particle type if selected bonding only on one side
 		ids = np.array([1,2,3,4,5,6,7,8])
 		types = np.array([8,9,10,11,12,13,7,7])
 	if key == 'RNDM' or key == 'R' or key == 'RANDOM':
